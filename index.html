@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>スケジュール帳 - プライベート版</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+    
+    <!-- カレンダー領域 -->
+    <main class="main-content">
+      <header class="calendar-header">
+        <button class="nav-arrow" id="prev-btn">◀</button>
+        <h2 id="calendar-title">2026年 10月</h2>
+        <button class="nav-arrow" id="next-btn">▶</button>
+      </header>
+
+      <div class="view-wrapper" id="view-week">
+        <div class="grid-header" id="week-header"></div>
+        <div class="all-day-row" id="all-day-row"></div>
+        <div class="timeline-container">
+          <div class="timeline-grid" id="timeline-grid"></div>
+        </div>
+      </div>
+
+      <div class="view-wrapper hidden" id="view-month">
+        <div class="month-grid" id="month-grid"></div>
+      </div>
+    </main>
+
+    <!-- 操作パネル (スマホ下部 / PC左側) -->
+    <aside class="sidebar">
+      <div class="brand">📅 SmartSchedule</div>
+      <div class="control-panel">
+        <button class="action-btn active" id="btn-week">週間</button>
+        <button class="action-btn" id="btn-month">月間</button>
+      </div>
+
+      <div class="preset-palette">
+        <div class="palette-header">
+          <h4>クイック追加</h4>
+          <button class="icon-btn" id="btn-open-preset-setting">⚙️</button>
+        </div>
+        <div class="palette-grid" id="palette-grid"></div>
+        <button class="btn-cancel-mode" id="btn-cancel-edit">追加モード解除</button>
+      </div>
+
+      <div class="settings-panel">
+        <button class="settings-btn" id="btn-open-timetable">🏫 裏時間割の設定</button>
+      </div>
+    </aside>
+
+    <!-- モーダル群 -->
+    <div class="modal-overlay" id="preset-modal">
+      <div class="modal-content">
+        <h3>ボタンのカスタマイズ</h3>
+        <div class="preset-list" id="preset-list"></div>
+        <button class="btn-add-preset" id="btn-add-preset">＋ 新しいボタンを追加</button>
+        <div class="modal-actions">
+          <button class="btn-modal-cancel" id="btn-preset-cancel">キャンセル</button>
+          <button class="btn-modal-save" id="btn-preset-save">保存</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-overlay" id="timetable-modal">
+      <div class="modal-content modal-large">
+        <h3>大学の講義時間を設定</h3>
+        <label class="toggle-semester">
+          <input type="checkbox" id="toggle-semester-active" checked>
+          <span>🏫 現在は授業期間中（裏時間割を有効にする）</span>
+        </label>
+        
+        <div class="timetable-editor" id="timetable-editor"></div>
+        <div class="modal-actions">
+          <button class="btn-modal-cancel" id="btn-timetable-cancel">キャンセル</button>
+          <button class="btn-modal-save" id="btn-timetable-save">保存</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>

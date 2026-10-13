@@ -1,0 +1,107 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Helvetica Neue', Arial, sans-serif; background: #f0f2f5; color: #333; height: 100vh; overflow: hidden; }
+
+.app-container { display: flex; flex-direction: column; height: 100vh; }
+
+.main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: #fff; z-index: 5; }
+.calendar-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; border-bottom: 1px solid #eee; background: #5D9CEC; color: white; }
+.calendar-header h2 { font-size: 16px; margin: 0; }
+.nav-arrow { background: none; border: none; font-size: 18px; cursor: pointer; color: white; padding: 5px 15px; }
+
+.view-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.hidden { display: none !important; }
+
+/* ウィークリー表示 */
+.grid-header { display: grid; grid-template-columns: 35px repeat(7, 1fr); background: #fafafa; border-bottom: 1px solid #eee; }
+.day-head { text-align: center; padding: 8px 0; font-size: 11px; color: #666; font-weight: bold; }
+.day-head.today { color: #5D9CEC; background: #e8f4fd; }
+
+.all-day-row { display: grid; grid-template-columns: 35px repeat(7, 1fr); background: #fdfdfd; border-bottom: 2px solid #ddd; min-height: 35px; }
+.all-day-label { font-size: 9px; color: #999; display: flex; align-items: center; justify-content: center; border-right: 1px solid #eee; }
+.all-day-cell { border-right: 1px solid #eee; padding: 2px; cursor: pointer; position: relative; background: #f8f9fa; border-bottom: 1px solid #eee; }
+.all-day-cell:empty::after { content: "＋"; color: #ccc; font-size: 14px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0; }
+.all-day-cell:hover:empty::after { opacity: 1; }
+
+.timeline-container { flex: 1; overflow-y: auto; }
+.timeline-grid { display: grid; grid-template-columns: 35px repeat(7, 1fr); }
+.time-col-label { border-right: 1px solid #eee; }
+.time-label { height: 45px; display: flex; justify-content: center; padding-top: 5px; font-size: 10px; color: #999; }
+.day-col-grid { border-right: 1px solid #eee; display: flex; flex-direction: column; }
+.time-cell { height: 45px; border-bottom: 1px dashed #eee; cursor: pointer; padding: 2px; }
+.time-cell.busy { background: repeating-linear-gradient(45deg, #f8f9fa, #f8f9fa 5px, #e9ecef 5px, #e9ecef 10px); }
+
+@keyframes popIn { 0% { opacity: 0; transform: scale(0.8); } 50% { transform: scale(1.05); } 100% { opacity: 1; transform: scale(1); } }
+.event-block { border-radius: 4px; padding: 2px; font-size: 10px; font-weight: bold; color: white; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; animation: popIn 0.3s forwards; }
+
+/* マンスリー表示 */
+.month-grid { display: grid; grid-template-columns: repeat(7, 1fr); height: 100%; }
+.month-day-cell { border-right: 1px solid #eee; border-bottom: 1px solid #eee; padding: 3px; cursor: pointer; }
+.month-date { font-size: 11px; font-weight: bold; color: #555; }
+.month-day-cell.other-month { background: #fafafa; opacity: 0.5; }
+.event-dot { width: 100%; border-radius: 3px; padding: 1px 2px; font-size: 9px; color: white; margin-bottom: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* サイドバー */
+.sidebar { background: #fff; padding: 10px; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 10; max-height: 40vh; overflow-y: auto; }
+.brand { display: none; }
+.control-panel { display: flex; gap: 5px; margin-bottom: 10px; }
+.action-btn { flex: 1; padding: 8px; border: none; border-radius: 6px; background: #f1f3f5; font-weight: bold; font-size: 13px; color: #555; cursor: pointer; }
+.action-btn.active { background: #5D9CEC; color: #fff; }
+
+.preset-palette { background: #f8f9fa; padding: 10px; border-radius: 8px; border: 1px solid #e9ecef; margin-bottom: 10px; }
+.palette-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+.palette-header h4 { font-size: 12px; color: #495057; margin:0; }
+.icon-btn { background: none; border: none; font-size: 14px; cursor: pointer; }
+.palette-grid { display: flex; gap: 5px; overflow-x: auto; padding-bottom: 5px; }
+.palette-btn { padding: 8px; border: none; border-radius: 6px; font-weight: bold; font-size: 12px; color: white; cursor: pointer; flex: 0 0 auto; min-width: 70px; }
+.palette-btn.selected { box-shadow: 0 0 0 2px #333; transform: translateY(-2px); }
+.btn-cancel-mode { width: 100%; padding: 6px; background: #dee2e6; border: none; border-radius: 6px; font-size: 12px; cursor: pointer; display: none; font-weight: bold; margin-top: 5px; }
+
+.settings-btn { width: 100%; padding: 8px; background: #fff; border: 1px solid #ced4da; border-radius: 6px; font-size: 12px; font-weight: bold; color: #495057; cursor: pointer; }
+
+/* モーダル */
+.modal-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 30; display: none; justify-content: center; align-items: center; }
+.modal-overlay.active { display: flex; }
+.modal-content { background: white; width: 90%; max-width: 400px; max-height: 80%; border-radius: 12px; padding: 15px; display: flex; flex-direction: column; }
+.modal-content h3 { margin-bottom: 15px; font-size: 15px; text-align: center; }
+.modal-large { max-width: 95%; }
+
+.toggle-semester { display: flex; align-items: center; gap: 8px; background: #e8f4fd; padding: 10px; border-radius: 8px; margin-bottom: 15px; cursor: pointer; font-size: 13px; font-weight: bold; color: #333; border: 1px solid #5D9CEC; }
+.toggle-semester input { width: 18px; height: 18px; accent-color: #5D9CEC; }
+
+.preset-list { flex: 1; overflow-y: auto; margin-bottom: 15px; }
+.preset-item { display: flex; gap: 5px; margin-bottom: 5px; }
+.preset-item input[type="text"] { flex: 1; border: 1px solid #ccc; padding: 5px; border-radius: 4px; font-size: 13px;}
+.preset-item input[type="color"] { width: 30px; height: 30px; border: none; padding: 0; }
+.btn-remove { background: #ff4d4f; color: white; border: none; border-radius: 4px; width: 30px; cursor: pointer; font-weight: bold; }
+.btn-add-preset { background: #f0f2f5; border: 1px dashed #ccc; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: bold; margin-bottom: 10px; width: 100%;}
+.modal-actions { display: flex; gap: 10px; }
+.btn-modal-cancel, .btn-modal-save { flex: 1; padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+.btn-modal-cancel { background: #e4e6eb; }
+.btn-modal-save { background: #5D9CEC; color: white; }
+
+.timetable-editor { overflow-x: auto; margin-bottom: 15px; }
+.tt-grid { display: grid; grid-template-columns: 40px repeat(7, 1fr); gap: 2px; }
+.tt-header { font-size: 10px; text-align: center; font-weight: bold; }
+.tt-time { font-size: 9px; color: #999; text-align: center; }
+.tt-checkbox { width: 100%; height: 25px; margin: 0; }
+
+@media (min-width: 768px) {
+  .app-container { flex-direction: row; } 
+  .sidebar { width: 280px; padding: 20px; box-shadow: 2px 0 10px rgba(0,0,0,0.05); max-height: 100vh; order: -1; }
+  .brand { display: block; font-size: 22px; margin-bottom: 20px; text-align: left; }
+  .action-btn { padding: 12px; font-size: 14px; }
+  .palette-grid { flex-wrap: wrap; }
+  .palette-btn { flex: 1; min-width: 100px; padding: 12px; font-size: 13px; }
+  .settings-panel { margin-top: auto; }
+  .main-content { border-radius: 0; }
+  .calendar-header { padding: 20px; background: #fff; color: #333; border-bottom: 2px solid #5D9CEC;}
+  .nav-arrow { color: #5D9CEC; }
+  .grid-header { grid-template-columns: 50px repeat(7, 1fr); }
+  .day-head { font-size: 13px; padding: 12px 0; }
+  .all-day-row, .timeline-grid { grid-template-columns: 50px repeat(7, 1fr); }
+  .time-col-label, .time-label { width: 50px; font-size: 12px; }
+  .time-cell, .time-label { height: 60px; }
+  .event-block { font-size: 12px; padding: 4px; }
+  .month-date { font-size: 14px; }
+  .event-dot { font-size: 11px; padding: 2px 4px; }
+}
