@@ -166,11 +166,13 @@
     for (let i = 0; i < 42; i++) {
       const key = formatDateKey(d), events = scheduleData[key] || {};
       const uniquePresetIds = [...new Set(Object.values(events).map(id => String(id)))];
-      const dots = uniquePresetIds.map(id => {
-        const preset = presetFor(id);
-        return preset ? `<span class="event-dot" style="--dot-color:${escapeHTML(preset.color)}" title="${escapeHTML(cleanPresetName(preset.name))}" aria-label="${escapeHTML(cleanPresetName(preset.name))}"></span>` : '';
-      }).join('');
-      html += `<div class="month-day-cell${d.getMonth() !== m ? ' other-month' : ''}${key === today ? ' today' : ''}" data-date="${key}"><div class="month-date">${d.getDate()}</div><div class="month-dots">${dots}</div></div>`;
+      const uniquePresets = uniquePresetIds.map(id => presetFor(id)).filter(Boolean);
+      const visiblePresets = uniquePresets.slice(0, 2);
+      const bars = visiblePresets.map(preset =>
+        `<div class="month-preset-bar" style="--bar-color:${escapeHTML(preset.color)}" title="${escapeHTML(cleanPresetName(preset.name))}">${escapeHTML(cleanPresetName(preset.name))}</div>`
+      ).join('');
+      const more = uniquePresets.length > 2 ? `<span class="month-more">+${uniquePresets.length - 2}</span>` : '';
+      html += `<div class="month-day-cell${d.getMonth() !== m ? ' other-month' : ''}${key === today ? ' today' : ''}" data-date="${key}"><div class="month-date">${d.getDate()}</div><div class="month-events">${bars}${more}</div></div>`;
       d.setDate(d.getDate() + 1);
     }
     grid.innerHTML = html; grid.querySelectorAll('.month-day-cell').forEach(cell => cell.addEventListener('click', () => { currentDate = new Date(`${cell.dataset.date}T12:00:00`); currentView = 'week'; updateUI(); }));
