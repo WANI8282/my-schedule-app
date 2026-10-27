@@ -1,87 +1,45 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>スケジュール帳 - プライベート版</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f6f7f9">
+  <title>スケジュール帳</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="app-container">
-    
-    <!-- カレンダー領域 -->
+  <div class="skeleton" id="skeleton" aria-hidden="true"><div class="skeleton-head"></div><div class="skeleton-grid"></div></div>
+  <div class="app-container" id="app" aria-label="スケジュール帳">
+    <div class="drawer-scrim" id="drawer-scrim"></div>
+    <aside class="sidebar" id="sidebar" aria-label="操作パネル">
+      <div class="brand">📅 <span>Schedule</span></div>
+      <div class="control-panel"><button class="action-btn active" id="btn-week">週間</button><button class="action-btn" id="btn-month">月間</button></div>
+      <section class="preset-palette">
+        <div class="palette-header"><h3>クイック追加</h3><button class="icon-btn" id="btn-open-preset-setting" aria-label="クイック追加を設定">⚙</button></div>
+        <p class="helper">種類を選んで、カレンダーをタップ</p>
+        <div class="palette-grid" id="palette-grid"></div>
+        <button class="btn-cancel-mode" id="btn-cancel-edit">選択を解除</button>
+      </section>
+      <button class="settings-btn" id="btn-open-timetable">🏫 裏時間割の設定</button>
+      <p class="privacy-note">予定はこの端末内に保存されます</p>
+    </aside>
     <main class="main-content">
       <header class="calendar-header">
-        <button class="nav-arrow" id="prev-btn">◀</button>
-        <h2 id="calendar-title">2026年 10月</h2>
-        <button class="nav-arrow" id="next-btn">▶</button>
+        <button class="menu-btn" id="menu-btn" aria-label="メニューを開く">≡</button>
+        <button class="nav-arrow" id="prev-btn" aria-label="前へ">‹</button>
+        <h1 id="calendar-title"></h1>
+        <button class="nav-arrow" id="next-btn" aria-label="次へ">›</button>
+        <button class="today-btn" id="today-btn">今日</button>
       </header>
-
-      <div class="view-wrapper" id="view-week">
-        <div class="grid-header" id="week-header"></div>
-        <div class="all-day-row" id="all-day-row"></div>
-        <div class="timeline-container">
-          <div class="timeline-grid" id="timeline-grid"></div>
-        </div>
-      </div>
-
-      <div class="view-wrapper hidden" id="view-month">
-        <div class="month-grid" id="month-grid"></div>
-      </div>
+      <div class="view-wrapper" id="view-week"><div class="grid-header" id="week-header"></div><div class="all-day-row" id="all-day-row"></div><div class="timeline-container"><div class="timeline-grid" id="timeline-grid"></div></div></div>
+      <div class="view-wrapper hidden" id="view-month"><div class="month-grid" id="month-grid"></div></div>
     </main>
-
-    <!-- 操作パネル (スマホ下部 / PC左側) -->
-    <aside class="sidebar">
-      <div class="brand">📅 SmartSchedule</div>
-      <div class="control-panel">
-        <button class="action-btn active" id="btn-week">週間</button>
-        <button class="action-btn" id="btn-month">月間</button>
-      </div>
-
-      <div class="preset-palette">
-        <div class="palette-header">
-          <h4>クイック追加</h4>
-          <button class="icon-btn" id="btn-open-preset-setting">⚙️</button>
-        </div>
-        <div class="palette-grid" id="palette-grid"></div>
-        <button class="btn-cancel-mode" id="btn-cancel-edit">追加モード解除</button>
-      </div>
-
-      <div class="settings-panel">
-        <button class="settings-btn" id="btn-open-timetable">🏫 裏時間割の設定</button>
-      </div>
-    </aside>
-
-    <!-- モーダル群 -->
-    <div class="modal-overlay" id="preset-modal">
-      <div class="modal-content">
-        <h3>ボタンのカスタマイズ</h3>
-        <div class="preset-list" id="preset-list"></div>
-        <button class="btn-add-preset" id="btn-add-preset">＋ 新しいボタンを追加</button>
-        <div class="modal-actions">
-          <button class="btn-modal-cancel" id="btn-preset-cancel">キャンセル</button>
-          <button class="btn-modal-save" id="btn-preset-save">保存</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="modal-overlay" id="timetable-modal">
-      <div class="modal-content modal-large">
-        <h3>大学の講義時間を設定</h3>
-        <label class="toggle-semester">
-          <input type="checkbox" id="toggle-semester-active" checked>
-          <span>🏫 現在は授業期間中（裏時間割を有効にする）</span>
-        </label>
-        
-        <div class="timetable-editor" id="timetable-editor"></div>
-        <div class="modal-actions">
-          <button class="btn-modal-cancel" id="btn-timetable-cancel">キャンセル</button>
-          <button class="btn-modal-save" id="btn-timetable-save">保存</button>
-        </div>
-      </div>
-    </div>
-
+    <button class="ai-fab" id="ai-fab"><span>✨</span> AIにおまかせ</button>
+    <div class="modal-overlay" id="preset-modal"><section class="modal-content bottom-sheet" role="dialog" aria-modal="true" aria-labelledby="preset-title"><div class="sheet-grabber"></div><h2 id="preset-title">クイック追加を編集</h2><div class="preset-list" id="preset-list"></div><button class="btn-add-preset" id="btn-add-preset">＋ ボタンを追加</button><div class="modal-actions"><button class="btn-modal-cancel" id="btn-preset-cancel">閉じる</button><button class="btn-modal-save" id="btn-preset-save">保存</button></div></section></div>
+    <div class="modal-overlay" id="timetable-modal"><section class="modal-content modal-large bottom-sheet" role="dialog" aria-modal="true" aria-labelledby="timetable-title"><div class="sheet-grabber"></div><h2 id="timetable-title">裏時間割</h2><label class="toggle-semester"><input type="checkbox" id="toggle-semester-active" checked><span>授業期間中として表示する</span></label><div class="timetable-editor" id="timetable-editor"></div><div class="modal-actions"><button class="btn-modal-cancel" id="btn-timetable-cancel">閉じる</button><button class="btn-modal-save" id="btn-timetable-save">保存</button></div></section></div>
+    <div class="modal-overlay" id="ai-modal"><section class="modal-content bottom-sheet ai-sheet" role="dialog" aria-modal="true" aria-labelledby="ai-title"><div class="sheet-grabber"></div><h2 id="ai-title">✨ AIにおまかせ</h2><p>予定にしたいことを、そのまま入力してください。</p><textarea id="ai-prompt" rows="3" placeholder="例：来週の空き時間にバイトを3つ入れて"></textarea><div class="modal-actions"><button class="btn-modal-cancel" id="ai-close">閉じる</button><button class="btn-modal-save" id="ai-submit">入力を確認</button></div><p class="mock-note" id="ai-note">AI連携の準備中です。入力内容は送信されません。</p></section></div>
   </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="script.js"></script>
 </body>
 </html>
