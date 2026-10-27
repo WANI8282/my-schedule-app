@@ -21,6 +21,9 @@
   let selectedPresetId = null;
   let highlightFreeTime = false;
   let editingPresets = [], editingTimetable = {};
+  let pendingUndo = null;
+  let pendingUndoTimeout = null;
+  let pendingDeleteRenderTimeout = null;
   const $ = (id) => document.getElementById(id);
   function cleanPresetName(value) {
     return String(value ?? '').replace(/[\p{Extended_Pictographic}\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2300}-\u{23FF}\u{FE0E}\u{FE0F}\u{200D}\u{20E3}\u{1F3FB}-\u{1F3FF}]/gu, '').replace(/\s+/g, ' ').trim();
@@ -31,7 +34,36 @@
     catch (_) { showToast('保存できませんでした。端末の空き容量をご確認ください'); }
   }
   function vibrate() { if ('vibrate' in navigator) navigator.vibrate(10); }
-  function showToast(message) { const el = $('toast'); el.textContent = message; el.classList.add('show'); clearTimeout(showToast.timer); showToast.timer = setTimeout(() => el.classList.remove('show'), 2100); }
+  function showToast(message) {
+    const el = $('toast');
+    clearTimeout(showToast.timer); clearTimeout(pendingUndoTimeout);
+    pendingUndo = null;
+    el.replaceChildren(document.createTextNode(message));
+    el.classList.add('show');
+    showToast.timer = setTimeout(() => el.classList.remove('show'), 2100);
+  }
+  function showUndoToast(message, undoAction) {
+    const el = $('toast');
+    clearTimeout(showToast.timer); clearTimeout(pendingUndoTimeout);
+    pendingUndo = undoAction;
+    const text = document.createElement('span'); text.textContent = message;
+    const button = document.createElement('button');
+    button.type = 'button'; button.className = 'toast-undo'; button.textContent = '元に戻す';
+    button.setAttribute('aria-label', '削除した予定を元に戻す');
+    button.addEventListener('click', () => {
+      if (!pendingUndo) return;
+      const restore = pendingUndo;
+      pendingUndo = null; clearTimeout(pendingUndoTimeout); clearTimeout(showToast.timer);
+      restore();
+      showToast('予定を元に戻しました');
+    }, { once: true });
+    el.replaceChildren(text, button);
+    el.classList.add('show');
+    pendingUndoTimeout = setTimeout(() => {
+      pendingUndo = null;
+      el.classList.remove('show');
+    }, 3800);
+  }
   function formatDateKey(d) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
   function normalizeDigits(text) { return text.replace(/[０-９]/g, digit => String.fromCharCode(digit.charCodeAt(0) - 0xFEE0)); }
   function parseNaturalDate(text) {
@@ -141,13 +173,29 @@
     if (currentView === 'week') { $('calendar-title').textContent = `${currentDate.getFullYear()}年 ${currentDate.getMonth() + 1}月`; renderWeekView(); }
     else { $('calendar-title').textContent = `${currentDate.getFullYear()}年 ${currentDate.getMonth() + 1}月`; renderMonthView(); }
   }
+  function removeScheduledEvent(date, time, presetId, cell) {
+    const backup = { date, time, presetId };
+    delete scheduleData[date][time];
+    if (!Object.keys(scheduleData[date]).length) delete scheduleData[date];
+    save(); vibrate();
+    const event = cell.querySelector('[data-event]');
+    if (event) event.classList.add('removing');
+    clearTimeout(pendingDeleteRenderTimeout);
+    pendingDeleteRenderTimeout = setTimeout(() => { pendingDeleteRenderTimeout = null; updateUI(); }, 430);
+    showUndoToast('予定を削除しました', () => {
+      clearTimeout(pendingDeleteRenderTimeout); pendingDeleteRenderTimeout = null;
+      scheduleData[backup.date] ||= {};
+      scheduleData[backup.date][backup.time] = backup.presetId;
+      save(); updateUI(); vibrate();
+    });
+  }
   function handleSlotClick(cell) {
     const date = cell.dataset.date, time = cell.dataset.time;
     const current = scheduleData[date] && scheduleData[date][time];
     if (current) {
-      if (selectedPresetId && String(current) === String(selectedPresetId)) { delete scheduleData[date][time]; if (!Object.keys(scheduleData[date]).length) delete scheduleData[date]; save(); vibrate(); const event = cell.querySelector('[data-event]'); if (event) event.classList.add('removing'); setTimeout(updateUI, 430); showToast('予定を削除しました'); }
+      if (selectedPresetId && String(current) === String(selectedPresetId)) removeScheduledEvent(date, time, current, cell);
       else if (selectedPresetId) { scheduleData[date][time] = selectedPresetId; save(); vibrate(); updateUI(); showToast('予定を変更しました'); }
-      else { delete scheduleData[date][time]; if (!Object.keys(scheduleData[date]).length) delete scheduleData[date]; save(); vibrate(); const event = cell.querySelector('[data-event]'); if (event) event.classList.add('removing'); setTimeout(updateUI, 430); showToast('予定を削除しました'); }
+      else removeScheduledEvent(date, time, current, cell);
     } else if (selectedPresetId) { if (!scheduleData[date]) scheduleData[date] = {}; scheduleData[date][time] = selectedPresetId; save(); vibrate(); updateUI(); showToast('予定を追加しました'); }
     else { selectedPresetId = null; showToast('追加する種類をメニューから選んでください'); }
   }
