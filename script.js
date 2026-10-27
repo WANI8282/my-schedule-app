@@ -156,7 +156,7 @@
     $('week-header').innerHTML = '<div class="day-head"></div>' + days.map(d => `<div class="day-head ${formatDateKey(d) === today ? 'today' : ''}">${dayName(d)} ${d.getDate()}</div>`).join('');
     $('all-day-row').innerHTML = '<div class="all-day-label">終日</div>' + days.map(d => { const key = formatDateKey(d), id = scheduleData[key] && scheduleData[key].allday; return `<div class="all-day-cell" data-date="${key}" data-time="allday">${id ? eventMarkup(id) : ''}</div>`; }).join('');
     let html = '<div class="time-col-label">' + hours.map(h => `<div class="time-label">${h}</div>`).join('') + '</div>';
-    days.forEach((d, index) => { const key = formatDateKey(d); html += '<div class="day-col-grid">' + hours.map(h => { const id = scheduleData[key] && scheduleData[key][h]; const busy = isSemesterActive && universitySchedule[index] && universitySchedule[index].includes(h); const free = highlightFreeTime && !id && !busy; return `<div class="time-cell${busy ? ' busy' : ''}${free ? ' free-highlight' : ''}" data-date="${key}" data-time="${h}">${id ? eventMarkup(id) : ''}</div>`; }).join('') + '</div>'; });
+    days.forEach((d, index) => { const key = formatDateKey(d); html += `<div class="day-col-grid${key === today ? ' today-column' : ''}">` + hours.map(h => { const id = scheduleData[key] && scheduleData[key][h]; const busy = isSemesterActive && universitySchedule[index] && universitySchedule[index].includes(h); const free = highlightFreeTime && !id && !busy; return `<div class="time-cell${busy ? ' busy' : ''}${free ? ' free-highlight' : ''}" data-date="${key}" data-time="${h}">${id ? eventMarkup(id) : ''}</div>`; }).join('') + '</div>'; });
     $('timeline-grid').innerHTML = html;
     document.querySelectorAll('.time-cell,.all-day-cell').forEach(cell => cell.addEventListener('click', () => handleSlotClick(cell)));
   }
@@ -199,7 +199,7 @@
     $('btn-month').onclick = () => { currentView = 'month'; updateUI(); closeDrawer(); };
     $('prev-btn').onclick = () => { if (currentView === 'week') currentDate.setDate(currentDate.getDate() - 7); else currentDate.setMonth(currentDate.getMonth() - 1); updateUI(); };
     $('next-btn').onclick = () => { if (currentView === 'week') currentDate.setDate(currentDate.getDate() + 7); else currentDate.setMonth(currentDate.getMonth() + 1); updateUI(); };
-    $('today-btn').onclick = () => { currentDate = new Date(); updateUI(); };
+    $('today-btn').onclick = () => { currentDate = new Date(); currentDate.setHours(12, 0, 0, 0); updateUI(); };
     $('theme-toggle').onclick = () => { isDarkMode = !isDarkMode; save(); updateUI(); vibrate(); };
     $('find-free-btn').onclick = () => { highlightFreeTime = !highlightFreeTime; updateUI(); vibrate(); showToast(highlightFreeTime ? '空いている時間をハイライトしました' : 'ハイライトを解除しました'); };
     $('copy-week-btn').onclick = () => {
