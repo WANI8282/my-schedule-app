@@ -12,17 +12,17 @@
   <div class="app-container glass-app" id="app" aria-label="スケジュール帳">
     <div class="drawer-scrim" id="drawer-scrim"></div>
     <aside class="sidebar" id="sidebar" aria-label="操作パネル">
-      <div class="brand">📅 <span>Schedule</span></div>
+      <div class="brand"><span>Schedule</span></div>
       <div class="control-panel"><button class="action-btn active" id="btn-week">週間</button><button class="action-btn" id="btn-month">月間</button></div>
       <section class="preset-palette">
-        <div class="palette-header"><h3>クイック追加</h3><button class="icon-btn" id="btn-open-preset-setting" aria-label="クイック追加を設定">⚙</button></div>
+        <div class="palette-header"><h3>クイック追加</h3><button class="icon-btn" id="btn-open-preset-setting" aria-label="クイック追加を設定">設定</button></div>
         <p class="helper">種類を選んで、カレンダーをタップ</p>
         <div class="palette-grid" id="palette-grid"></div>
         <button class="btn-cancel-mode" id="btn-cancel-edit">選択を解除</button>
       </section>
-      <button class="settings-btn" id="find-free-btn" aria-pressed="false">💡 空き時間を探す</button>
-      <button class="settings-btn" id="copy-week-btn">🔄 先週をコピー</button>
-      <button class="settings-btn" id="btn-open-timetable">🏫 裏時間割の設定</button>
+      <button class="settings-btn" id="find-free-btn" aria-pressed="false">空き時間を探す</button>
+      <button class="settings-btn" id="copy-week-btn">先週をコピー</button>
+      <button class="settings-btn" id="btn-open-timetable">裏時間割の設定</button>
       <p class="privacy-note">予定はこの端末内に保存されます</p>
     </aside>
     <main class="main-content">
@@ -32,15 +32,15 @@
         <h1 id="calendar-title"></h1>
         <button class="nav-arrow" id="next-btn" aria-label="次へ">›</button>
         <button class="today-btn" id="today-btn">今日</button>
-        <button class="theme-btn" id="theme-toggle" aria-label="ダークモードに切り替え">🌙</button>
+        <button class="theme-btn" id="theme-toggle" aria-label="ダークモードに切り替え">ナイト</button>
       </header>
       <div class="view-wrapper" id="view-week"><div class="grid-header" id="week-header"></div><div class="all-day-row" id="all-day-row"></div><div class="timeline-container"><div class="timeline-grid" id="timeline-grid"></div></div></div>
       <div class="view-wrapper hidden" id="view-month"><div class="month-grid" id="month-grid"></div></div>
     </main>
-    <button class="ai-fab" id="ai-fab"><span>✨</span> AIにおまかせ</button>
+    <button class="ai-fab" id="ai-fab">AIにおまかせ</button>
     <div class="modal-overlay" id="preset-modal"><section class="modal-content bottom-sheet" role="dialog" aria-modal="true" aria-labelledby="preset-title"><div class="sheet-grabber"></div><h2 id="preset-title">クイック追加を編集</h2><div class="preset-list" id="preset-list"></div><button class="btn-add-preset" id="btn-add-preset">＋ ボタンを追加</button><div class="modal-actions"><button class="btn-modal-cancel" id="btn-preset-cancel">閉じる</button><button class="btn-modal-save" id="btn-preset-save">保存</button></div></section></div>
     <div class="modal-overlay" id="timetable-modal"><section class="modal-content modal-large bottom-sheet" role="dialog" aria-modal="true" aria-labelledby="timetable-title"><div class="sheet-grabber"></div><h2 id="timetable-title">裏時間割</h2><label class="toggle-semester"><input type="checkbox" id="toggle-semester-active" checked><span>授業期間中として表示する</span></label><div class="timetable-editor" id="timetable-editor"></div><div class="modal-actions"><button class="btn-modal-cancel" id="btn-timetable-cancel">閉じる</button><button class="btn-modal-save" id="btn-timetable-save">保存</button></div></section></div>
-    <div class="modal-overlay" id="ai-modal"><section class="modal-content bottom-sheet ai-sheet" role="dialog" aria-modal="true" aria-labelledby="ai-title"><div class="sheet-grabber"></div><h2 id="ai-title">✨ AIにおまかせ</h2><p>予定にしたいことを、そのまま入力してください。</p><textarea id="ai-prompt" rows="3" placeholder="例：来週の空き時間にバイトを3つ入れて"></textarea><div class="modal-actions"><button class="btn-modal-cancel" id="ai-close">閉じる</button><button class="btn-modal-save" id="ai-submit">入力を確認</button></div><p class="mock-note" id="ai-note">AI連携の準備中です。入力内容は送信されません。</p></section></div>
+    <div class="modal-overlay" id="ai-modal"><section class="modal-content bottom-sheet ai-sheet" role="dialog" aria-modal="true" aria-labelledby="ai-title"><div class="sheet-grabber"></div><h2 id="ai-title">AIにおまかせ</h2><p>予定にしたいことを、そのまま入力してください。</p><textarea id="ai-prompt" rows="3" placeholder="例：来週の空き時間にバイトを3つ入れて"></textarea><div class="modal-actions"><button class="btn-modal-cancel" id="ai-close">閉じる</button><button class="btn-modal-save" id="ai-submit">入力を確認</button></div><p class="mock-note" id="ai-note">AI連携の準備中です。入力内容は送信されません。</p></section></div>
   </div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="script.js"></script>
