@@ -163,7 +163,16 @@
   function renderMonthView() {
     const grid = $('month-grid'); let html = dayNames.map(n => `<div class="day-head">${n}</div>`).join('');
     const y = currentDate.getFullYear(), m = currentDate.getMonth(), first = new Date(y, m, 1), offset = first.getDay() === 0 ? 6 : first.getDay() - 1; const d = new Date(y, m, 1 - offset), today = formatDateKey(new Date());
-    for (let i = 0; i < 42; i++) { const key = formatDateKey(d), events = scheduleData[key] || {}; const dots = Object.values(events).map(id => eventMarkup(id, 'event-dot')).join(''); html += `<div class="month-day-cell${d.getMonth() !== m ? ' other-month' : ''}${key === today ? ' today' : ''}" data-date="${key}"><div class="month-date">${d.getDate()}</div>${dots}</div>`; d.setDate(d.getDate() + 1); }
+    for (let i = 0; i < 42; i++) {
+      const key = formatDateKey(d), events = scheduleData[key] || {};
+      const uniquePresetIds = [...new Set(Object.values(events).map(id => String(id)))];
+      const dots = uniquePresetIds.map(id => {
+        const preset = presetFor(id);
+        return preset ? `<span class="event-dot" style="--dot-color:${escapeHTML(preset.color)}" title="${escapeHTML(cleanPresetName(preset.name))}" aria-label="${escapeHTML(cleanPresetName(preset.name))}"></span>` : '';
+      }).join('');
+      html += `<div class="month-day-cell${d.getMonth() !== m ? ' other-month' : ''}${key === today ? ' today' : ''}" data-date="${key}"><div class="month-date">${d.getDate()}</div><div class="month-dots">${dots}</div></div>`;
+      d.setDate(d.getDate() + 1);
+    }
     grid.innerHTML = html; grid.querySelectorAll('.month-day-cell').forEach(cell => cell.addEventListener('click', () => { currentDate = new Date(`${cell.dataset.date}T12:00:00`); currentView = 'week'; updateUI(); }));
   }
   function openModal(id) { $(id).classList.add('active'); vibrate(); }
