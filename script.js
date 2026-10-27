@@ -14,14 +14,16 @@
   let universitySchedule = saved.universitySchedule && typeof saved.universitySchedule === 'object' ? saved.universitySchedule : defaults.universitySchedule;
   let scheduleData = saved.scheduleData && typeof saved.scheduleData === 'object' ? saved.scheduleData : {};
   let isSemesterActive = typeof saved.isSemesterActive === 'boolean' ? saved.isSemesterActive : true;
+  let isDarkMode = saved.isDarkMode === true;
   let currentDate = new Date();
   let currentView = 'week';
   let selectedPresetId = null;
+  let highlightFreeTime = false;
   let editingPresets = [], editingTimetable = {};
   const $ = (id) => document.getElementById(id);
   const escapeHTML = (s) => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
   function save() {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ presets, universitySchedule, scheduleData, isSemesterActive })); }
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ presets, universitySchedule, scheduleData, isSemesterActive, isDarkMode })); }
     catch (_) { showToast('保存できませんでした。端末の空き容量をご確認ください'); }
   }
   function vibrate() { if ('vibrate' in navigator) navigator.vibrate(10); }
@@ -41,6 +43,11 @@
   }
   function eventMarkup(id, cls = 'event-block') { const p = presetFor(id); return p ? `<div class="${cls}" style="background:${escapeHTML(p.color)}" data-event="true">${escapeHTML(p.name)}</div>` : ''; }
   function updateUI() {
+    document.documentElement.dataset.theme = isDarkMode ? 'dark' : 'light';
+    $('theme-toggle').textContent = isDarkMode ? '☀️' : '🌙';
+    $('theme-toggle').setAttribute('aria-label', isDarkMode ? 'ライトモードに切り替え' : 'ダークモードに切り替え');
+    $('find-free-btn').setAttribute('aria-pressed', String(highlightFreeTime));
+    $('find-free-btn').classList.toggle('is-active', highlightFreeTime);
     renderPalette(); $('btn-week').classList.toggle('active', currentView === 'week'); $('btn-month').classList.toggle('active', currentView === 'month');
     $('view-week').classList.toggle('hidden', currentView !== 'week'); $('view-month').classList.toggle('hidden', currentView !== 'month');
     if (currentView === 'week') { $('calendar-title').textContent = `${currentDate.getFullYear()}年 ${currentDate.getMonth() + 1}月`; renderWeekView(); }
@@ -50,9 +57,9 @@
     const date = cell.dataset.date, time = cell.dataset.time;
     const current = scheduleData[date] && scheduleData[date][time];
     if (current) {
-      if (selectedPresetId && String(current) === String(selectedPresetId)) { delete scheduleData[date][time]; if (!Object.keys(scheduleData[date]).length) delete scheduleData[date]; save(); vibrate(); const event = cell.querySelector('[data-event]'); if (event) event.classList.add('removing'); setTimeout(updateUI, 290); showToast('予定を削除しました'); }
+      if (selectedPresetId && String(current) === String(selectedPresetId)) { delete scheduleData[date][time]; if (!Object.keys(scheduleData[date]).length) delete scheduleData[date]; save(); vibrate(); const event = cell.querySelector('[data-event]'); if (event) event.classList.add('removing'); setTimeout(updateUI, 430); showToast('予定を削除しました'); }
       else if (selectedPresetId) { scheduleData[date][time] = selectedPresetId; save(); vibrate(); updateUI(); showToast('予定を変更しました'); }
-      else { delete scheduleData[date][time]; if (!Object.keys(scheduleData[date]).length) delete scheduleData[date]; save(); vibrate(); const event = cell.querySelector('[data-event]'); if (event) event.classList.add('removing'); setTimeout(updateUI, 290); showToast('予定を削除しました'); }
+      else { delete scheduleData[date][time]; if (!Object.keys(scheduleData[date]).length) delete scheduleData[date]; save(); vibrate(); const event = cell.querySelector('[data-event]'); if (event) event.classList.add('removing'); setTimeout(updateUI, 430); showToast('予定を削除しました'); }
     } else if (selectedPresetId) { if (!scheduleData[date]) scheduleData[date] = {}; scheduleData[date][time] = selectedPresetId; save(); vibrate(); updateUI(); showToast('予定を追加しました'); }
     else { selectedPresetId = null; showToast('追加する種類をメニューから選んでください'); }
   }
@@ -61,7 +68,7 @@
     $('week-header').innerHTML = '<div class="day-head"></div>' + days.map(d => `<div class="day-head ${formatDateKey(d) === today ? 'today' : ''}">${dayName(d)} ${d.getDate()}</div>`).join('');
     $('all-day-row').innerHTML = '<div class="all-day-label">終日</div>' + days.map(d => { const key = formatDateKey(d), id = scheduleData[key] && scheduleData[key].allday; return `<div class="all-day-cell" data-date="${key}" data-time="allday">${id ? eventMarkup(id) : ''}</div>`; }).join('');
     let html = '<div class="time-col-label">' + hours.map(h => `<div class="time-label">${h}</div>`).join('') + '</div>';
-    days.forEach((d, index) => { const key = formatDateKey(d); html += '<div class="day-col-grid">' + hours.map(h => { const id = scheduleData[key] && scheduleData[key][h]; const busy = isSemesterActive && universitySchedule[index] && universitySchedule[index].includes(h); return `<div class="time-cell${busy ? ' busy' : ''}" data-date="${key}" data-time="${h}">${id ? eventMarkup(id) : ''}</div>`; }).join('') + '</div>'; });
+    days.forEach((d, index) => { const key = formatDateKey(d); html += '<div class="day-col-grid">' + hours.map(h => { const id = scheduleData[key] && scheduleData[key][h]; const busy = isSemesterActive && universitySchedule[index] && universitySchedule[index].includes(h); const free = highlightFreeTime && !id && !busy; return `<div class="time-cell${busy ? ' busy' : ''}${free ? ' free-highlight' : ''}" data-date="${key}" data-time="${h}">${id ? eventMarkup(id) : ''}</div>`; }).join('') + '</div>'; });
     $('timeline-grid').innerHTML = html;
     document.querySelectorAll('.time-cell,.all-day-cell').forEach(cell => cell.addEventListener('click', () => handleSlotClick(cell)));
   }
@@ -94,6 +101,24 @@
     $('prev-btn').onclick = () => { if (currentView === 'week') currentDate.setDate(currentDate.getDate() - 7); else currentDate.setMonth(currentDate.getMonth() - 1); updateUI(); };
     $('next-btn').onclick = () => { if (currentView === 'week') currentDate.setDate(currentDate.getDate() + 7); else currentDate.setMonth(currentDate.getMonth() + 1); updateUI(); };
     $('today-btn').onclick = () => { currentDate = new Date(); updateUI(); };
+    $('theme-toggle').onclick = () => { isDarkMode = !isDarkMode; save(); updateUI(); vibrate(); };
+    $('find-free-btn').onclick = () => { highlightFreeTime = !highlightFreeTime; updateUI(); vibrate(); showToast(highlightFreeTime ? '空いている時間をハイライトしました' : 'ハイライトを解除しました'); };
+    $('copy-week-btn').onclick = () => {
+      const days = getWeekDays(currentDate);
+      const source = days.map(d => { const prev = new Date(d); prev.setDate(prev.getDate() - 7); return scheduleData[formatDateKey(prev)] || {}; });
+      const total = source.reduce((sum, events) => sum + Object.keys(events).length, 0);
+      if (!total) { showToast('先週にはコピーできる予定がありません'); closeDrawer(); return; }
+      if (!confirm('先週の予定を、今週の空いている時間にコピーしますか？')) return;
+      let copied = 0, skipped = 0;
+      days.forEach((d, i) => {
+        const targetKey = formatDateKey(d); scheduleData[targetKey] ||= {};
+        Object.entries(source[i]).forEach(([time, id]) => {
+          if (scheduleData[targetKey][time] == null) { scheduleData[targetKey][time] = id; copied++; } else skipped++;
+        });
+        if (!Object.keys(scheduleData[targetKey]).length) delete scheduleData[targetKey];
+      });
+      save(); updateUI(); closeDrawer(); vibrate(); showToast(`先週の予定を${copied}件コピー${skipped ? `（${skipped}件は既存予定のためスキップ）` : ''}`);
+    };
     $('menu-btn').onclick = openDrawer; $('drawer-scrim').onclick = closeDrawer;
     $('btn-cancel-edit').onclick = () => { selectedPresetId = null; $('btn-cancel-edit').style.display = 'none'; renderPalette(); vibrate(); };
     $('btn-open-preset-setting').onclick = openPresetModal;

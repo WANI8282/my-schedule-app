@@ -2,3 +2,45 @@
 @media(max-width:767px){.app-container{display:block}.main-content{height:100%;margin:0;border-radius:0}.calendar-header{height:58px;gap:8px;padding:0 10px}.calendar-header h1{font-size:15px;min-width:0;flex:1}.menu-btn{display:block}.nav-arrow{font-size:23px;padding:4px}.today-btn{padding:6px 8px}.grid-header,.all-day-row,.timeline-grid{grid-template-columns:38px repeat(7,minmax(0,1fr))}.day-head{font-size:10px;padding:9px 0}.time-label{font-size:8px}.time-cell{padding:2px}.event-block{font-size:8px;padding:2px 1px;border-radius:5px}.all-day-cell{padding:2px}.month-grid{grid-template-rows:31px repeat(6,minmax(78px,1fr))}.month-day-cell{padding:3px}.event-dot{font-size:8px}.sidebar{position:fixed;z-index:22;left:0;top:0;bottom:0;width:min(82vw,310px);background:#f7f8fa;transform:translateX(-105%);transition:transform .25s cubic-bezier(.2,.8,.2,1);padding:calc(22px + env(safe-area-inset-top)) 18px 22px;box-shadow:8px 0 30px #00000016}.sidebar.open{transform:translateX(0)}.drawer-scrim.open{display:block;position:fixed;inset:0;background:#11182755;z-index:21}.brand{font-size:19px}.ai-fab{right:14px;bottom:calc(14px + env(safe-area-inset-bottom));padding:12px 15px}.modal-overlay{padding:0}.modal-content{width:100%;max-height:88dvh}.toast{bottom:calc(78px + env(safe-area-inset-bottom))}}
 @media(min-width:768px){.modal-overlay{align-items:center;padding:20px}.modal-content{border-radius:18px;width:min(100%,520px);max-height:85vh}.modal-large{width:min(95vw,850px)}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+
+/* 空き時間とタップのフィードバック */
+.settings-btn.is-active{background:#fff8d9;border-color:#f2ce55;color:#735c00}
+.free-highlight{z-index:0;background:#fff5b8!important;animation:free-glow 1.35s ease-in-out infinite alternate}
+@keyframes free-glow{from{box-shadow:inset 0 0 0 1px #f2d45766}to{box-shadow:inset 0 0 13px 3px #f2c94c99;background:#ffef91!important}}
+.event-block{animation:pop-in .34s cubic-bezier(.2,.9,.3,1.35);transform-origin:center}
+@keyframes pop-in{0%{opacity:0;transform:scale(.7)}65%{opacity:1;transform:scale(1.09)}100%{opacity:1;transform:scale(1)}}
+.event-block.removing{animation:poof .42s cubic-bezier(.2,.75,.3,1) forwards}
+@keyframes poof{0%{opacity:1;transform:scale(1) rotate(0);filter:brightness(1)}24%{opacity:1;transform:scale(1.14) rotate(3deg);filter:brightness(1.25)}65%{opacity:.65;transform:scale(.88) rotate(-5deg);filter:blur(1px)}100%{opacity:0;transform:scale(.25) translateY(-10px) rotate(12deg);filter:blur(4px)}}
+.theme-btn{border:1px solid var(--line);background:var(--card);border-radius:9px;padding:6px 8px;font-size:15px}
+
+/* 保存されるナイトビュー */
+html[data-theme="dark"]{color-scheme:dark;background:#1c1c1e;color:#f2f2f7;--line:#38383a;--muted:#98989f;--card:#242426;--blue:#6b9cff}
+html[data-theme="dark"] body,html[data-theme="dark"] .app-container{background:#1c1c1e;color:#f2f2f7}
+html[data-theme="dark"] .main-content{background:#242426;box-shadow:0 2px 14px #0005}
+html[data-theme="dark"] .sidebar{background:#1c1c1e}
+html[data-theme="dark"] .preset-palette,html[data-theme="dark"] .settings-btn,html[data-theme="dark"] .today-btn,html[data-theme="dark"] .theme-btn{background:#2c2c2e;color:#e5e5ea;border-color:#3a3a3c}
+html[data-theme="dark"] .control-panel{background:#303033}
+html[data-theme="dark"] .action-btn{color:#b7b7bd}
+html[data-theme="dark"] .action-btn.active{background:#48484a;color:#fff}
+html[data-theme="dark"] .calendar-header{border-color:#38383a}
+html[data-theme="dark"] .nav-arrow,html[data-theme="dark"] .menu-btn,html[data-theme="dark"] .calendar-header h1{color:#f2f2f7}
+html[data-theme="dark"] .day-head,html[data-theme="dark"] .month-date{color:#b7b7bd}
+html[data-theme="dark"] .day-head.today,html[data-theme="dark"] .month-day-cell.today .month-date{color:#8ab4ff}
+html[data-theme="dark"] .all-day-cell{background:#252527}
+html[data-theme="dark"] .all-day-label,html[data-theme="dark"] .time-col-label,html[data-theme="dark"] .day-col-grid,html[data-theme="dark"] .time-cell,html[data-theme="dark"] .all-day-cell,html[data-theme="dark"] .month-day-cell{border-color:#38383a}
+html[data-theme="dark"] .time-label,html[data-theme="dark"] .all-day-label{color:#8e8e93}
+html[data-theme="dark"] .time-cell:hover,html[data-theme="dark"] .all-day-cell:hover{background:#30343c}
+html[data-theme="dark"] .time-cell.busy{background:repeating-linear-gradient(135deg,#28282a,#28282a 5px,#303033 5px,#303033 10px)}
+html[data-theme="dark"] .month-day-cell.other-month{background:#202022}
+html[data-theme="dark"] .modal-content{background:#2c2c2e;color:#f2f2f7}
+html[data-theme="dark"] .sheet-grabber{background:#636366}
+html[data-theme="dark"] .preset-item input[type=text],html[data-theme="dark"] .ai-sheet textarea{background:#1c1c1e;color:#f2f2f7;border-color:#48484a}
+html[data-theme="dark"] .btn-modal-cancel,html[data-theme="dark"] .btn-add-preset{background:#3a3a3c;color:#eee;border-color:#545458}
+html[data-theme="dark"] .toggle-semester{background:#353b48}
+html[data-theme="dark"] .free-highlight{background:#64551c!important;animation-name:free-glow-dark}
+@keyframes free-glow-dark{from{box-shadow:inset 0 0 0 1px #d7b84c55}to{box-shadow:inset 0 0 13px 3px #d7b84c99;background:#5b4e1e!important}}
+html[data-theme="dark"] .settings-btn.is-active{background:#51471f;border-color:#8b7628;color:#ffe28a}
+html[data-theme="dark"] .skeleton{background-color:#1c1c1e;background-image:linear-gradient(100deg,#1c1c1e 30%,#29292c 45%,#1c1c1e 60%)}
+html[data-theme="dark"] .skeleton-head,html[data-theme="dark"] .skeleton-grid{background-color:#29292c}
+.sidebar{overflow-y:auto}
+@media(prefers-reduced-motion:reduce){.free-highlight{animation:none}}
