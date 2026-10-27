@@ -44,3 +44,42 @@ html[data-theme="dark"] .skeleton{background-color:#1c1c1e;background-image:line
 html[data-theme="dark"] .skeleton-head,html[data-theme="dark"] .skeleton-grid{background-color:#29292c}
 .sidebar{overflow-y:auto}
 @media(prefers-reduced-motion:reduce){.free-highlight{animation:none}}
+
+/* Soft aurora glass finish */
+body{background-color:#edf1fa;background-image:radial-gradient(ellipse at 8% 8%,rgba(156,190,255,.42),transparent 36%),radial-gradient(ellipse at 88% 12%,rgba(214,184,255,.34),transparent 32%),radial-gradient(ellipse at 74% 92%,rgba(255,196,215,.32),transparent 35%),radial-gradient(ellipse at 18% 84%,rgba(174,221,255,.30),transparent 34%);background-attachment:fixed}
+.app-container{background:transparent}
+.sidebar,.main-content,.modal-content{background:rgba(255,255,255,.68);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border:1px solid rgba(255,255,255,.5);box-shadow:0 8px 32px 0 rgba(31,38,135,.07)}
+.sidebar{border-radius:18px;margin:12px 0 12px 12px;padding:24px 18px}
+.main-content{border-radius:20px;margin:12px}
+.modal-content{border-radius:22px 22px 0 0}
+.preset-palette,.control-panel{background:rgba(255,255,255,.38);border:1px solid rgba(255,255,255,.48);backdrop-filter:blur(12px) saturate(160%);-webkit-backdrop-filter:blur(12px) saturate(160%)}
+.control-panel{border-radius:12px}
+.settings-btn,.today-btn,.theme-btn,.btn-modal-cancel,.btn-add-preset{border:1px solid rgba(255,255,255,.64);background:linear-gradient(145deg,rgba(255,255,255,.78),rgba(238,243,255,.48));backdrop-filter:blur(12px) saturate(160%);-webkit-backdrop-filter:blur(12px) saturate(160%);border-radius:12px;box-shadow:0 3px 12px rgba(62,81,137,.06);transition:transform .24s cubic-bezier(.2,.8,.2,1),box-shadow .24s,background .24s}
+.settings-btn:hover,.today-btn:hover,.theme-btn:hover,.btn-modal-cancel:hover,.btn-add-preset:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(62,81,137,.13)}
+.settings-btn:active,.today-btn:active,.theme-btn:active,.btn-modal-cancel:active,.btn-add-preset:active{transform:translateY(0) scale(.98)}
+.settings-btn.is-active{background:linear-gradient(135deg,rgba(255,244,190,.88),rgba(255,255,255,.62));border-color:rgba(232,197,83,.55)}
+.palette-btn{border-radius:12px;border:1px solid rgba(255,255,255,.5);background-image:linear-gradient(145deg,rgba(255,255,255,.22),rgba(255,255,255,0)),linear-gradient(var(--preset-color,transparent),var(--preset-color,transparent));box-shadow:0 5px 14px rgba(35,45,80,.13);transition:transform .24s cubic-bezier(.2,.8,.2,1),box-shadow .24s,filter .24s}
+.palette-btn:hover{transform:translateY(-3px);box-shadow:0 10px 22px rgba(35,45,80,.18);filter:saturate(1.08)}
+.palette-btn:active{transform:translateY(-1px) scale(.97)}
+.calendar-header{background:rgba(255,255,255,.14);border-bottom-color:rgba(140,153,184,.16)}
+.all-day-cell,.time-cell,.month-day-cell{background-color:rgba(255,255,255,.13)}
+.time-cell:hover,.all-day-cell:hover,.month-day-cell:hover{background-color:rgba(255,255,255,.44)}
+.grid-header,.all-day-row,.time-cell,.month-day-cell{border-color:rgba(113,128,160,.14)}
+.event-block,.event-dot{box-shadow:0 4px 11px rgba(24,35,70,.16);border:1px solid rgba(255,255,255,.25)}
+.ai-fab{background:linear-gradient(135deg,#444d68,#262d42);border:1px solid rgba(255,255,255,.32);backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);box-shadow:0 10px 28px rgba(34,42,75,.25);transition:transform .24s cubic-bezier(.2,.8,.2,1),box-shadow .24s}
+.ai-fab:hover{transform:translateY(-3px);box-shadow:0 15px 34px rgba(34,42,75,.32)}
+.modal-overlay{background:rgba(23,30,49,.28);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
+html[data-theme="dark"] body{background-color:#101521;background-image:radial-gradient(ellipse at 12% 10%,rgba(45,74,130,.54),transparent 38%),radial-gradient(ellipse at 90% 14%,rgba(69,51,110,.43),transparent 35%),radial-gradient(ellipse at 70% 95%,rgba(31,78,103,.38),transparent 38%),linear-gradient(145deg,#101521,#181923 55%,#101b27)}
+html[data-theme="dark"] .app-container{background:transparent}
+html[data-theme="dark"] .sidebar,html[data-theme="dark"] .main-content,html[data-theme="dark"] .modal-content{background:rgba(28,28,30,.72);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border:1px solid rgba(255,255,255,.11);box-shadow:0 8px 32px rgba(0,0,0,.22)}
+html[data-theme="dark"] .preset-palette,html[data-theme="dark"] .control-panel{background:rgba(255,255,255,.055);border-color:rgba(255,255,255,.09);backdrop-filter:blur(12px) saturate(160%);-webkit-backdrop-filter:blur(12px) saturate(160%)}
+html[data-theme="dark"] .settings-btn,html[data-theme="dark"] .today-btn,html[data-theme="dark"] .theme-btn,html[data-theme="dark"] .btn-modal-cancel,html[data-theme="dark"] .btn-add-preset{background:linear-gradient(145deg,rgba(255,255,255,.12),rgba(255,255,255,.045));border-color:rgba(255,255,255,.12);color:#f2f2f7;box-shadow:0 4px 14px rgba(0,0,0,.12)}
+html[data-theme="dark"] .settings-btn.is-active{background:linear-gradient(135deg,rgba(119,99,35,.68),rgba(57,51,35,.62));border-color:rgba(230,196,82,.35);color:#ffe28a}
+html[data-theme="dark"] .action-btn.active{background:rgba(255,255,255,.14);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+html[data-theme="dark"] .calendar-header{background:rgba(255,255,255,.025);border-color:rgba(255,255,255,.08)}
+html[data-theme="dark"] .all-day-cell,html[data-theme="dark"] .time-cell,html[data-theme="dark"] .month-day-cell{background-color:rgba(255,255,255,.018)}
+html[data-theme="dark"] .time-cell:hover,html[data-theme="dark"] .all-day-cell:hover,html[data-theme="dark"] .month-day-cell:hover{background-color:rgba(255,255,255,.07)}
+html[data-theme="dark"] .time-cell.busy{background:repeating-linear-gradient(135deg,rgba(255,255,255,.025),rgba(255,255,255,.025) 5px,rgba(255,255,255,.06) 5px,rgba(255,255,255,.06) 10px)}
+html[data-theme="dark"] .ai-fab{background:linear-gradient(135deg,rgba(75,91,131,.88),rgba(34,40,59,.9));border-color:rgba(255,255,255,.18);box-shadow:0 10px 30px rgba(0,0,0,.36)}
+html[data-theme="dark"] .modal-overlay{background:rgba(0,0,0,.45)}
+@media(max-width:767px){.sidebar{margin:0;border-radius:0 20px 20px 0}.main-content{margin:0;border-radius:0}.modal-content{border-radius:22px 22px 0 0}}
