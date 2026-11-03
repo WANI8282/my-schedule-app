@@ -169,9 +169,37 @@
     $('find-free-btn').setAttribute('aria-pressed', String(highlightFreeTime));
     $('find-free-btn').classList.toggle('is-active', highlightFreeTime);
     renderPalette(); $('btn-week').classList.toggle('active', currentView === 'week'); $('btn-month').classList.toggle('active', currentView === 'month');
+    renderNextEvent();
     $('view-week').classList.toggle('hidden', currentView !== 'week'); $('view-month').classList.toggle('hidden', currentView !== 'month');
     if (currentView === 'week') { $('calendar-title').textContent = `${currentDate.getFullYear()}年 ${currentDate.getMonth() + 1}月`; renderWeekView(); }
     else { $('calendar-title').textContent = `${currentDate.getFullYear()}年 ${currentDate.getMonth() + 1}月`; renderMonthView(); }
+  }
+  function renderNextEvent() {
+    const detail = $('next-event-detail');
+    const now = new Date();
+    const todayKey = formatDateKey(now);
+    const entries = Object.entries(scheduleData).sort(([a], [b]) => a.localeCompare(b));
+    let next = null;
+    for (const [dateKey, events] of entries) {
+      if (dateKey < todayKey) continue;
+      if (events.allday != null) {
+        const preset = presetFor(events.allday);
+        if (preset) { next = { dateKey, time: '終日', name: cleanPresetName(preset.name) }; break; }
+      }
+      const timed = Object.entries(events).filter(([time]) => time !== 'allday').sort(([a], [b]) => a.localeCompare(b));
+      for (const [time, id] of timed) {
+        const hour = Number(time.split(':')[0]);
+        if (!Number.isFinite(hour)) continue;
+        const candidate = new Date(`${dateKey}T${String(hour).padStart(2, '0')}:00:00`);
+        if (candidate < now) continue;
+        const preset = presetFor(id);
+        if (preset) { next = { dateKey, time, name: cleanPresetName(preset.name) }; break; }
+      }
+      if (next) break;
+    }
+    if (!next) { detail.textContent = '予定はありません'; return; }
+    const dateLabel = next.dateKey === todayKey ? '' : `${Number(next.dateKey.slice(5, 7))}/${Number(next.dateKey.slice(8, 10))} `;
+    detail.textContent = `${dateLabel}${next.time}${next.time === '終日' ? '' : '〜'}  ·  ${next.name}`;
   }
   function removeScheduledEvent(date, time, presetId, cell) {
     const backup = { date, time, presetId };
@@ -196,14 +224,32 @@
       if (selectedPresetId && String(current) === String(selectedPresetId)) removeScheduledEvent(date, time, current, cell);
       else if (selectedPresetId) { scheduleData[date][time] = selectedPresetId; save(); vibrate(); updateUI(); showToast('予定を変更しました'); }
       else removeScheduledEvent(date, time, current, cell);
-    } else if (selectedPresetId) { if (!scheduleData[date]) scheduleData[date] = {}; scheduleData[date][time] = selectedPresetId; save(); vibrate(); updateUI(); showToast('予定を追加しました'); }
+    } else if (selectedPresetId) {
+      const startHour = Number(time.split(':')[0]);
+      const timedSlot = time !== 'allday' && Number.isFinite(startHour);
+      const slots = timedSlot ? [startHour, startHour + 1].filter(hour => hour <= 21).map(hour => `${hour}:00`) : [time];
+      let added = 0;
+      slots.forEach((slot, index) => {
+        scheduleData[date] ||= {};
+        if (index > 0 && scheduleData[date][slot] != null) return;
+        if (index > 0 && timedSlot && isSemesterActive) {
+          const weekday = (new Date(`${date}T12:00:00`).getDay() + 6) % 7;
+          if (universitySchedule[weekday] && universitySchedule[weekday].includes(slot)) return;
+        }
+        scheduleData[date][slot] = selectedPresetId;
+        added++;
+      });
+      save(); vibrate(); updateUI();
+      showToast(added > 1 ? '予定を2時間分まとめて追加しました' : '予定を1時間分追加しました');
+    }
     else { selectedPresetId = null; showToast('追加する種類をメニューから選んでください'); }
   }
   function renderWeekView() {
     const days = getWeekDays(currentDate), today = formatDateKey(new Date());
     $('week-header').innerHTML = '<div class="day-head"></div>' + days.map(d => `<div class="day-head ${formatDateKey(d) === today ? 'today' : ''}">${dayName(d)} ${d.getDate()}</div>`).join('');
     $('all-day-row').innerHTML = '<div class="all-day-label">終日</div>' + days.map(d => { const key = formatDateKey(d), id = scheduleData[key] && scheduleData[key].allday; return `<div class="all-day-cell" data-date="${key}" data-time="allday">${id ? eventMarkup(id) : ''}</div>`; }).join('');
-    let html = '<div class="time-col-label">' + hours.map(h => `<div class="time-label">${h}</div>`).join('') + '</div>';
+    const periodLabels = { '9:00': '1限', '10:00': '2限', '13:00': '3限', '14:00': '4限', '16:00': '5限' };
+    let html = '<div class="time-col-label">' + hours.map(h => `<div class="time-label"><span>${h}</span>${periodLabels[h] ? `<small>${periodLabels[h]}</small>` : ''}</div>`).join('') + '</div>';
     days.forEach((d, index) => {
       const key = formatDateKey(d);
       const cells = hours.map(h => {

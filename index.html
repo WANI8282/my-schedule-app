@@ -16,7 +16,7 @@
       <div class="control-panel"><button class="action-btn active" id="btn-week">週間</button><button class="action-btn" id="btn-month">月間</button></div>
       <section class="preset-palette">
         <div class="palette-header"><h3>クイック追加</h3><button class="icon-btn" id="btn-open-preset-setting" aria-label="クイック追加を設定">設定</button></div>
-        <p class="helper">種類を選んで、カレンダーをタップ</p>
+        <p class="helper">種類を選んで、開始時刻をタップすると2時間分追加</p>
         <div class="palette-grid" id="palette-grid"></div>
         <button class="btn-cancel-mode" id="btn-cancel-edit">選択を解除</button>
       </section>
@@ -34,6 +34,10 @@
         <button class="today-btn" id="today-btn">今日</button>
         <button class="theme-btn" id="theme-toggle" aria-label="ダークモードに切り替え">ナイト</button>
       </header>
+      <section class="next-event-card" id="next-event-card" aria-live="polite">
+        <span class="next-event-label">次の予定</span>
+        <span class="next-event-detail" id="next-event-detail">予定を確認しています</span>
+      </section>
       <div class="view-wrapper" id="view-week"><div class="grid-header" id="week-header"></div><div class="all-day-row" id="all-day-row"></div><div class="timeline-container"><div class="timeline-grid" id="timeline-grid"></div></div></div>
       <div class="view-wrapper hidden" id="view-month"><div class="month-grid" id="month-grid"></div></div>
     </main>
