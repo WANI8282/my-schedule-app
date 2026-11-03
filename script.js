@@ -1,11 +1,18 @@
 (() => {
   'use strict';
   const STORAGE_KEY = 'schedule-app-v1';
-  const hours = Array.from({ length: 13 }, (_, i) => `${i + 9}:00`);
+  const hours = Array.from({ length: 15 }, (_, i) => `${i + 8}:00`);
   const dayNames = ['月', '火', '水', '木', '金', '土', '日'];
+  const classPeriods = [
+    { id: 'P1', label: '1限', start: 9 * 60, end: 10 * 60 + 30 },
+    { id: 'P2', label: '2限', start: 10 * 60 + 40, end: 12 * 60 + 10 },
+    { id: 'P3', label: '3限', start: 13 * 60, end: 14 * 60 + 30 },
+    { id: 'P4', label: '4限', start: 14 * 60 + 40, end: 16 * 60 + 10 },
+    { id: 'P5', label: '5限', start: 16 * 60 + 20, end: 17 * 60 + 50 }
+  ];
   const defaults = {
     presets: [{ id: 1, name: 'バイト', color: '#f39b38' }, { id: 2, name: 'サークル', color: '#45a878' }, { id: 3, name: '遊び', color: '#e36c86' }, { id: 4, name: '旅行', color: '#9074d5' }],
-    universitySchedule: { 1: ['10:00', '13:00'], 2: ['10:00'] },
+    universitySchedule: { 1: ['P2', 'P3'], 2: ['P2'] },
     scheduleData: {}, isSemesterActive: true
   };
   let saved = {};
@@ -67,6 +74,30 @@
     }, 3800);
   }
   function formatDateKey(d) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
+  function selectedPeriodsForDay(dayIndex, schedule = universitySchedule) {
+    const values = Array.isArray(schedule[dayIndex]) ? schedule[dayIndex] : [];
+    const selected = new Set(values.filter(value => classPeriods.some(period => period.id === value)));
+    values.forEach(value => {
+      if (typeof value !== 'string' || !/^\d{1,2}:\d{2}$/.test(value)) return;
+      const start = Number(value.slice(0, 2)) * 60 + Number(value.slice(3, 5));
+      const nearest = classPeriods.map(period => ({ period, distance: Math.abs(period.start - start) })).sort((a, b) => a.distance - b.distance)[0];
+      if (nearest && nearest.distance <= 60) selected.add(nearest.period.id);
+      else classPeriods.filter(period => start < period.end && start + 60 > period.start).forEach(period => selected.add(period.id));
+    });
+    return classPeriods.filter(period => selected.has(period.id)).map(period => period.id);
+  }
+  function periodOverlaysForHour(dayIndex, hour) {
+    const slotStart = hour * 60, slotEnd = slotStart + 60;
+    const selected = new Set(selectedPeriodsForDay(dayIndex));
+    return classPeriods.filter(period => selected.has(period.id) && period.start < slotEnd && period.end > slotStart).map(period => {
+      const start = Math.max(period.start, slotStart), end = Math.min(period.end, slotEnd);
+      return { period, top: (start - slotStart) / 60 * 100, height: (end - start) / 60 * 100, startsHere: start === period.start };
+    });
+  }
+  function isClassBusy(dayIndex, time) {
+    const hour = Number(time.split(':')[0]);
+    return periodOverlaysForHour(dayIndex, hour).length > 0;
+  }
   function normalizeDigits(text) { return text.replace(/[０-９]/g, digit => String.fromCharCode(digit.charCodeAt(0) - 0xFEE0)); }
   function parseNaturalDate(text) {
     const today = new Date(); today.setHours(0, 0, 0, 0);
@@ -108,14 +139,14 @@
     const withoutRanges = input.replace(rangePattern, (_, startH, _startM, endH) => {
       specified = true;
       const start = Number(startH), end = Number(endH);
-      for (let hour = start; hour < end; hour++) if (hour >= 9 && hour <= 21) found.add(`${hour}:00`);
+      for (let hour = start; hour < end; hour++) if (hour >= 8 && hour <= 22) found.add(`${hour}:00`);
       return ' ';
     });
     const singlePattern = /(\d{1,2}):([0-5]\d)|(?<![\d/])(\d{1,2})\s*時(?:\s*(\d{1,2})\s*分)?/g;
     for (const match of withoutRanges.matchAll(singlePattern)) {
       specified = true;
       const hour = Number(match[1] || match[3]);
-      if (hour >= 9 && hour <= 21) found.add(`${hour}:00`);
+      if (hour >= 8 && hour <= 22) found.add(`${hour}:00`);
     }
     return { slots: [...found].sort((a, b) => Number(a.split(':')[0]) - Number(b.split(':')[0])), specified };
   }
@@ -131,7 +162,7 @@
     const date = parseNaturalDate(input);
     const parsedTime = parseNaturalTimes(input);
     if (parsedTime.specified && !parsedTime.slots.length) {
-      showToast('予定は9時から21時の範囲で指定してください'); return false;
+      showToast('予定は8時から23時の範囲で指定してください'); return false;
     }
     const dateKey = formatDateKey(date);
     const slots = parsedTime.specified ? parsedTime.slots : ['allday'];
@@ -170,11 +201,27 @@
     $('theme-toggle').setAttribute('aria-label', isDarkMode ? 'ライトモードに切り替え' : 'ダークモードに切り替え');
     $('find-free-btn').setAttribute('aria-pressed', String(highlightFreeTime));
     $('find-free-btn').classList.toggle('is-active', highlightFreeTime);
+    renderWageEstimate();
     renderPalette(); $('btn-week').classList.toggle('active', currentView === 'week'); $('btn-month').classList.toggle('active', currentView === 'month');
     renderNextEvent();
     $('view-week').classList.toggle('hidden', currentView !== 'week'); $('view-month').classList.toggle('hidden', currentView !== 'month');
     if (currentView === 'week') { $('calendar-title').textContent = `${currentDate.getFullYear()}年 ${currentDate.getMonth() + 1}月`; renderWeekView(); }
     else { $('calendar-title').textContent = `${currentDate.getFullYear()}年 ${currentDate.getMonth() + 1}月`; renderMonthView(); }
+  }
+  function renderWageEstimate() {
+    const targetMonth = formatDateKey(new Date()).slice(0, 7);
+    const wagePreset = presets.find(preset => cleanPresetName(preset.name).includes('バイト'));
+    let hoursThisMonth = 0;
+    if (wagePreset) {
+      Object.entries(scheduleData).forEach(([dateKey, events]) => {
+        if (!dateKey.startsWith(targetMonth)) return;
+        Object.entries(events || {}).forEach(([time, presetId]) => {
+          if (time !== 'allday' && /^\d{1,2}:\d{2}$/.test(time) && String(presetId) === String(wagePreset.id)) hoursThisMonth++;
+        });
+      });
+    }
+    $('wage-total').textContent = `¥${(hoursThisMonth * 1100).toLocaleString('ja-JP')}`;
+    $('wage-hours').textContent = `${hoursThisMonth}時間分の予定`;
   }
   function renderNextEvent() {
     const detail = $('next-event-detail');
@@ -239,7 +286,7 @@
     for (let hour = low; hour <= high; hour++) {
       const slot = `${hour}:00`;
       if (scheduleData[date][slot] != null) continue;
-      if (isSemesterActive && universitySchedule[weekday] && universitySchedule[weekday].includes(slot)) continue;
+      if (isSemesterActive && isClassBusy(weekday, slot)) continue;
       scheduleData[date][slot] = selectedPresetId;
       added++;
     }
@@ -250,15 +297,17 @@
     const days = getWeekDays(currentDate), today = formatDateKey(new Date());
     $('week-header').innerHTML = '<div class="day-head"></div>' + days.map(d => `<div class="day-head ${formatDateKey(d) === today ? 'today' : ''}">${dayName(d)} ${d.getDate()}</div>`).join('');
     $('all-day-row').innerHTML = '<div class="all-day-label">終日</div>' + days.map(d => { const key = formatDateKey(d), id = scheduleData[key] && scheduleData[key].allday; return `<div class="all-day-cell" data-date="${key}" data-time="allday">${id ? eventMarkup(id) : ''}</div>`; }).join('');
-    const periodLabels = { '9:00': '1限', '10:00': '2限', '13:00': '3限', '14:00': '4限', '16:00': '5限' };
-    let html = '<div class="time-col-label">' + hours.map(h => `<div class="time-label"><span>${h}</span>${periodLabels[h] ? `<small>${periodLabels[h]}</small>` : ''}</div>`).join('') + '</div>';
+    const periodLabels = { '9:00': '1限 · 9:00', '10:00': '2限 · 10:40', '13:00': '3限 · 13:00', '14:00': '4限 · 14:40', '16:00': '5限 · 16:20' };
+    let html = '<div class="time-col-label">' + hours.map(h => `<div class="time-label"><span>${h}</span>${periodLabels[h] ? `<small>${periodLabels[h]}</small>` : ''}</div>`).join('') + '<div class="time-label end-time-label"><span>23:00</span></div></div>';
     days.forEach((d, index) => {
       const key = formatDateKey(d);
       const cells = hours.map((h, hourIndex) => {
         const id = scheduleData[key] && scheduleData[key][h];
         const sameAsPrevious = id != null && hourIndex > 0 && String(scheduleData[key] && scheduleData[key][hours[hourIndex - 1]]) === String(id);
         const sameAsNext = id != null && hourIndex < hours.length - 1 && String(scheduleData[key] && scheduleData[key][hours[hourIndex + 1]]) === String(id);
-        const busy = Boolean(isSemesterActive && universitySchedule[index] && universitySchedule[index].includes(h));
+        const hour = Number(h.split(':')[0]);
+        const overlays = isSemesterActive ? periodOverlaysForHour(index, hour) : [];
+        const busy = overlays.length > 0;
         const classes = ['time-cell'];
         if (id) classes.push('has-event');
         if (sameAsPrevious) classes.push('event-continues-up');
@@ -266,7 +315,8 @@
         if (busy) classes.push('busy');
         if (highlightFreeTime && !id && !busy) classes.push('free-highlight');
         const blockClass = `event-block${sameAsPrevious ? ' connects-up' : ''}${sameAsNext ? ' connects-down' : ''}`;
-        return `<div class="${classes.join(' ')}" data-date="${key}" data-time="${h}">${id ? eventMarkup(id, blockClass) : ''}</div>`;
+        const classMarkup = overlays.map(overlay => `<span class="class-overlay" style="--class-top:${overlay.top}%;--class-height:${overlay.height}%" aria-label="${overlay.period.label} 授業">${overlay.startsHere ? '授業' : ''}</span>`).join('');
+        return `<div class="${classes.join(' ')}" data-date="${key}" data-time="${h}">${classMarkup}${id ? eventMarkup(id, blockClass) : ''}</div>`;
       }).join('');
       html += `<div class="day-col-grid${key === today ? ' today-column' : ''}">${cells}</div>`;
     });
@@ -312,11 +362,18 @@
     editingPresets.forEach((p, i) => { const row = document.createElement('div'); row.className = 'preset-item'; row.innerHTML = `<input type="text" maxlength="24" aria-label="予定の名前" value="${escapeHTML(cleanPresetName(p.name))}"><input type="color" aria-label="色" value="${/^#[0-9a-f]{6}$/i.test(p.color) ? p.color : '#3478f6'}"><button class="btn-remove" aria-label="削除">×</button>`; row.querySelector('input[type=text]').addEventListener('input', e => editingPresets[i].name = e.target.value); row.querySelector('input[type=color]').addEventListener('input', e => editingPresets[i].color = e.target.value); row.querySelector('.btn-remove').addEventListener('click', () => { editingPresets.splice(i, 1); renderPresetEditor(); }); list.append(row); });
   }
   function openTimetableModal() {
-    editingTimetable = JSON.parse(JSON.stringify(universitySchedule)); $('toggle-semester-active').checked = isSemesterActive;
-    let html = '<div class="tt-grid"><div class="tt-header">時間</div>' + dayNames.map(d => `<div class="tt-header">${d}</div>`).join('');
-    hours.forEach(h => { html += `<div class="tt-time">${h}</div>`; for (let i = 0; i < 7; i++) html += `<div><input type="checkbox" class="tt-checkbox" data-d="${i}" data-h="${h}" ${editingTimetable[i] && editingTimetable[i].includes(h) ? 'checked' : ''}></div>`; });
+    editingTimetable = Object.fromEntries(Array.from({ length: 7 }, (_, day) => [day, selectedPeriodsForDay(day)]));
+    $('toggle-semester-active').checked = isSemesterActive;
+    let html = '<div class="tt-grid period-grid"><div class="tt-header">コマ</div>' + dayNames.map(d => `<div class="tt-header">${d}</div>`).join('');
+    classPeriods.forEach(period => {
+      html += `<div class="tt-period">${period.label}<small>${String(Math.floor(period.start / 60)).padStart(2, '0')}:${String(period.start % 60).padStart(2, '0')}</small></div>`;
+      for (let day = 0; day < 7; day++) html += `<div class="tt-period-check"><input type="checkbox" class="tt-checkbox" data-d="${day}" data-period="${period.id}" aria-label="${dayNames[day]}曜日 ${period.label}" ${editingTimetable[day].includes(period.id) ? 'checked' : ''}></div>`;
+    });
     $('timetable-editor').innerHTML = html + '</div>';
-    document.querySelectorAll('.tt-checkbox').forEach(cb => cb.addEventListener('change', e => { const day = e.target.dataset.d, hour = e.target.dataset.h; editingTimetable[day] ||= []; editingTimetable[day] = e.target.checked ? [...new Set([...editingTimetable[day], hour])] : editingTimetable[day].filter(x => x !== hour); }));
+    document.querySelectorAll('.tt-checkbox').forEach(cb => cb.addEventListener('change', e => {
+      const day = e.target.dataset.d, periodId = e.target.dataset.period;
+      editingTimetable[day] = e.target.checked ? [...new Set([...editingTimetable[day], periodId])] : editingTimetable[day].filter(id => id !== periodId);
+    }));
     openModal('timetable-modal');
   }
   function openDrawer() { $('sidebar').classList.add('open'); $('drawer-scrim').classList.add('open'); $('menu-btn').setAttribute('aria-expanded', 'true'); }
@@ -379,4 +436,7 @@
   bindEvents(); updateUI();
   if (savedPresetNamesNeedCleaning) save();
   setTimeout(() => $('skeleton').classList.add('done'), 500);
+  if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+    navigator.serviceWorker.register('./service-worker.js').catch(() => {});
+  }
 })();

@@ -1,0 +1,17 @@
+{
+  "id": "./",
+  "name": "Schedule — スケジュール帳",
+  "short_name": "Schedule",
+  "description": "予定をシンプルに管理する、大学生向けスケジュール帳",
+  "lang": "ja",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#e9eafa",
+  "theme_color": "#e9eafa",
+  "icons": [
+    { "src": "icons/app-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
