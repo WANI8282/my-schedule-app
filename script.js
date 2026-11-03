@@ -3,26 +3,29 @@
   const STORAGE_KEY = 'schedule-app-v1';
   const hours = Array.from({ length: 15 }, (_, i) => `${i + 8}:00`);
   const dayNames = ['月', '火', '水', '木', '金', '土', '日'];
-  const classPeriods = [
-    { id: 'P1', label: '1限', start: 9 * 60, end: 10 * 60 + 30 },
-    { id: 'P2', label: '2限', start: 10 * 60 + 40, end: 12 * 60 + 10 },
-    { id: 'P3', label: '3限', start: 13 * 60, end: 14 * 60 + 30 },
-    { id: 'P4', label: '4限', start: 14 * 60 + 40, end: 16 * 60 + 10 },
-    { id: 'P5', label: '5限', start: 16 * 60 + 20, end: 17 * 60 + 50 }
-  ];
+  const classStartTimes = {
+    60: [9 * 60, 10 * 60, 11 * 60, 13 * 60, 14 * 60, 15 * 60, 16 * 60],
+    90: [9 * 60, 10 * 60 + 40, 13 * 60, 14 * 60 + 40, 16 * 60 + 20]
+  };
+  function buildClassPeriods(minutes) {
+    return classStartTimes[minutes].map((start, index) => ({ id: `P${index + 1}`, label: `${index + 1}限`, start, end: start + minutes }));
+  }
   const defaults = {
     presets: [{ id: 1, name: 'バイト', color: '#f39b38' }, { id: 2, name: 'サークル', color: '#45a878' }, { id: 3, name: '遊び', color: '#e36c86' }, { id: 4, name: '旅行', color: '#9074d5' }],
-    universitySchedule: { 1: ['P2', 'P3'], 2: ['P2'] },
+    universitySchedule: { 1: ['P2', 'P4'], 2: ['P2'] },
     scheduleData: {}, isSemesterActive: true
   };
   let saved = {};
   try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}') || {}; } catch (_) { saved = {}; }
+  let timetablePeriodMode = saved.timetablePeriodMode === 90 ? 90 : 60;
+  let classPeriods = buildClassPeriods(timetablePeriodMode);
   const savedPresetNamesNeedCleaning = Array.isArray(saved.presets) && saved.presets.some(p => p && cleanPresetName(p.name) !== p.name);
   let presets = Array.isArray(saved.presets) ? saved.presets.filter(p => p && typeof p === 'object').map(p => ({ ...p, name: cleanPresetName(p.name) })) : defaults.presets;
   let universitySchedule = saved.universitySchedule && typeof saved.universitySchedule === 'object' ? saved.universitySchedule : defaults.universitySchedule;
   let scheduleData = saved.scheduleData && typeof saved.scheduleData === 'object' ? saved.scheduleData : {};
   let isSemesterActive = typeof saved.isSemesterActive === 'boolean' ? saved.isSemesterActive : true;
   let isDarkMode = saved.isDarkMode === true;
+  let originalTimetablePeriodMode = timetablePeriodMode;
   let currentDate = new Date();
   let currentView = 'week';
   let selectedPresetId = null;
@@ -39,7 +42,7 @@
   }
   const escapeHTML = (s) => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
   function save() {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ presets, universitySchedule, scheduleData, isSemesterActive, isDarkMode })); }
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ presets, universitySchedule, scheduleData, isSemesterActive, isDarkMode, timetablePeriodMode })); }
     catch (_) { showToast('保存できませんでした。端末の空き容量をご確認ください'); }
   }
   function vibrate() { if ('vibrate' in navigator) navigator.vibrate(10); }
@@ -297,7 +300,7 @@
     const days = getWeekDays(currentDate), today = formatDateKey(new Date());
     $('week-header').innerHTML = '<div class="day-head"></div>' + days.map(d => `<div class="day-head ${formatDateKey(d) === today ? 'today' : ''}">${dayName(d)} ${d.getDate()}</div>`).join('');
     $('all-day-row').innerHTML = '<div class="all-day-label">終日</div>' + days.map(d => { const key = formatDateKey(d), id = scheduleData[key] && scheduleData[key].allday; return `<div class="all-day-cell" data-date="${key}" data-time="allday">${id ? eventMarkup(id) : ''}</div>`; }).join('');
-    const periodLabels = { '9:00': '1限 · 9:00', '10:00': '2限 · 10:40', '13:00': '3限 · 13:00', '14:00': '4限 · 14:40', '16:00': '5限 · 16:20' };
+    const periodLabels = Object.fromEntries(classPeriods.map(period => [`${Math.floor(period.start / 60)}:00`, `${period.label} · ${String(Math.floor(period.start / 60)).padStart(2, '0')}:${String(period.start % 60).padStart(2, '0')}`]));
     let html = '<div class="time-col-label">' + hours.map(h => `<div class="time-label"><span>${h}</span>${periodLabels[h] ? `<small>${periodLabels[h]}</small>` : ''}</div>`).join('') + '<div class="time-label end-time-label"><span>23:00</span></div></div>';
     days.forEach((d, index) => {
       const key = formatDateKey(d);
@@ -362,8 +365,21 @@
     editingPresets.forEach((p, i) => { const row = document.createElement('div'); row.className = 'preset-item'; row.innerHTML = `<input type="text" maxlength="24" aria-label="予定の名前" value="${escapeHTML(cleanPresetName(p.name))}"><input type="color" aria-label="色" value="${/^#[0-9a-f]{6}$/i.test(p.color) ? p.color : '#3478f6'}"><button class="btn-remove" aria-label="削除">×</button>`; row.querySelector('input[type=text]').addEventListener('input', e => editingPresets[i].name = e.target.value); row.querySelector('input[type=color]').addEventListener('input', e => editingPresets[i].color = e.target.value); row.querySelector('.btn-remove').addEventListener('click', () => { editingPresets.splice(i, 1); renderPresetEditor(); }); list.append(row); });
   }
   function openTimetableModal() {
+    originalTimetablePeriodMode = timetablePeriodMode;
     editingTimetable = Object.fromEntries(Array.from({ length: 7 }, (_, day) => [day, selectedPeriodsForDay(day)]));
     $('toggle-semester-active').checked = isSemesterActive;
+    renderPeriodLengthButtons();
+    renderTimetableEditor();
+    openModal('timetable-modal');
+  }
+  function renderPeriodLengthButtons() {
+    document.querySelectorAll('.period-length-btn').forEach(button => {
+      const active = Number(button.dataset.minutes) === timetablePeriodMode;
+      button.classList.toggle('active', active);
+      button.setAttribute('aria-pressed', String(active));
+    });
+  }
+  function renderTimetableEditor() {
     let html = '<div class="tt-grid period-grid"><div class="tt-header">コマ</div>' + dayNames.map(d => `<div class="tt-header">${d}</div>`).join('');
     classPeriods.forEach(period => {
       html += `<div class="tt-period">${period.label}<small>${String(Math.floor(period.start / 60)).padStart(2, '0')}:${String(period.start % 60).padStart(2, '0')}</small></div>`;
@@ -374,7 +390,12 @@
       const day = e.target.dataset.d, periodId = e.target.dataset.period;
       editingTimetable[day] = e.target.checked ? [...new Set([...editingTimetable[day], periodId])] : editingTimetable[day].filter(id => id !== periodId);
     }));
-    openModal('timetable-modal');
+  }
+  function cancelTimetableModal() {
+    timetablePeriodMode = originalTimetablePeriodMode;
+    classPeriods = buildClassPeriods(timetablePeriodMode);
+    updateUI();
+    closeModal('timetable-modal');
   }
   function openDrawer() { $('sidebar').classList.add('open'); $('drawer-scrim').classList.add('open'); $('menu-btn').setAttribute('aria-expanded', 'true'); }
   function closeDrawer() { $('sidebar').classList.remove('open'); $('drawer-scrim').classList.remove('open'); $('menu-btn').setAttribute('aria-expanded', 'false'); }
@@ -425,13 +446,23 @@
     $('btn-preset-cancel').onclick = () => closeModal('preset-modal');
     $('btn-preset-save').onclick = () => { presets = editingPresets.filter(p => cleanPresetName(p.name)).map(p => ({ ...p, name: cleanPresetName(p.name) })); if (selectedPresetId && !presetFor(selectedPresetId)) selectedPresetId = null; save(); updateUI(); closeModal('preset-modal'); showToast('設定を保存しました'); };
     $('btn-open-timetable').onclick = () => { closeDrawer(); openTimetableModal(); };
-    $('btn-timetable-cancel').onclick = () => closeModal('timetable-modal');
-    $('btn-timetable-save').onclick = () => { universitySchedule = editingTimetable; isSemesterActive = $('toggle-semester-active').checked; save(); updateUI(); closeModal('timetable-modal'); showToast('裏時間割を保存しました'); };
+    document.querySelectorAll('.period-length-btn').forEach(button => button.addEventListener('click', () => {
+      const nextMode = Number(button.dataset.minutes);
+      if (nextMode === timetablePeriodMode) return;
+      timetablePeriodMode = nextMode; classPeriods = buildClassPeriods(timetablePeriodMode);
+      renderPeriodLengthButtons(); renderTimetableEditor(); updateUI(); vibrate();
+    }));
+    $('btn-timetable-cancel').onclick = cancelTimetableModal;
+    $('btn-timetable-save').onclick = () => {
+      const validIds = new Set(classPeriods.map(period => period.id));
+      universitySchedule = Object.fromEntries(Array.from({ length: 7 }, (_, day) => [day, (editingTimetable[day] || []).filter(id => validIds.has(id))]));
+      isSemesterActive = $('toggle-semester-active').checked; save(); updateUI(); closeModal('timetable-modal'); showToast('裏時間割を保存しました');
+    };
     $('ai-fab').onclick = () => { $('ai-prompt').value = ''; openModal('ai-modal'); setTimeout(() => $('ai-prompt').focus(), 100); };
     $('ai-close').onclick = () => closeModal('ai-modal');
     $('ai-submit').onclick = () => { const text = $('ai-prompt').value.trim(); if (!text) { $('ai-prompt').focus(); showToast('予定の内容を入力してください'); return; } addNaturalLanguageEvent(text); };
-    document.querySelectorAll('.modal-overlay').forEach(overlay => overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(overlay.id); }));
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') { document.querySelectorAll('.modal-overlay.active').forEach(x => closeModal(x.id)); closeDrawer(); } });
+    document.querySelectorAll('.modal-overlay').forEach(overlay => overlay.addEventListener('click', e => { if (e.target === overlay) overlay.id === 'timetable-modal' ? cancelTimetableModal() : closeModal(overlay.id); }));
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') { document.querySelectorAll('.modal-overlay.active').forEach(x => x.id === 'timetable-modal' ? cancelTimetableModal() : closeModal(x.id)); closeDrawer(); } });
   }
   bindEvents(); updateUI();
   if (savedPresetNamesNeedCleaning) save();
