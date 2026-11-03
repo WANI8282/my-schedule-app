@@ -116,6 +116,7 @@
       if (result && result < today) result = validDate(year + 1, +match[1], +match[2]);
       return result || today;
     }
+    if (/明々後日|明明後日/.test(input)) { today.setDate(today.getDate() + 3); return today; }
     if (/明後日|あさって/.test(input)) { today.setDate(today.getDate() + 2); return today; }
     if (/明日/.test(input)) { today.setDate(today.getDate() + 1); return today; }
     if (/今日/.test(input)) return today;
@@ -176,7 +177,7 @@
   function addNaturalLanguageEvent(text) {
     const input = normalizeDigits(cleanInputText(text));
     const aliases = [
-      { words: ['呑み', '飲み', '飲み会', 'ごはん', '食事', 'デート', '遊び'], target: '遊び' },
+      { words: ['呑み', '飲み', '飲み会', 'ごはん', '食事', 'デート', '遊ぶ', '遊び', '遊んだ'], target: '遊び' },
       { words: ['練習', '部活', 'サークル'], target: 'サークル' },
       { words: ['シフト', 'アルバイト', 'バイト'], target: 'バイト' },
       { words: ['旅行', '旅'], target: '旅行' }
@@ -190,7 +191,7 @@
         if (preset) break;
       }
     }
-    let selected = preset || presets[0];
+    let selected = preset || presetFor(selectedPresetId) || presets[0];
     if (!selected) {
       selected = { id: Date.now(), name: '予定', color: '#6979c7' };
       presets.push(selected);
