@@ -63,9 +63,13 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 .time-label{display:flex;justify-content:center;height:54px;padding-top:5px;color:var(--muted);font-size:9px}
 .day-col-grid{display:flex;flex-direction:column;border-right:1px solid rgba(255,255,255,.12)}
 .time-cell{height:54px;padding:3px;border-bottom:1px solid rgba(255,255,255,.1)}
+.time-cell.has-event{padding-top:0;padding-bottom:0;border-bottom-color:transparent}
 .time-cell:hover,.all-day-cell:hover,.month-day-cell:hover{z-index:1;background:rgba(255,255,255,.52);box-shadow:inset 0 0 0 1px rgba(255,255,255,.55)}
 .time-cell.busy{background:repeating-linear-gradient(135deg,rgba(130,139,177,.09),rgba(130,139,177,.09) 5px,rgba(255,255,255,.12) 5px,rgba(255,255,255,.12) 10px)}
 .event-block{display:flex;width:100%;height:100%;align-items:center;justify-content:center;overflow:hidden;padding:3px 4px;border:1px solid rgba(255,255,255,.32);border-radius:8px;color:#fff;font-size:10px;font-weight:650;text-overflow:ellipsis;white-space:nowrap;box-shadow:0 3px 10px rgba(34,39,73,.13);animation:pop-in .28s cubic-bezier(.2,.9,.3,1.2)}
+.event-block.connects-up{border-top-left-radius:2px;border-top-right-radius:2px;border-top-color:transparent;box-shadow:0 2px 7px rgba(34,39,73,.1)}
+.event-block.connects-down{border-bottom-left-radius:2px;border-bottom-right-radius:2px;border-bottom-color:transparent;box-shadow:0 2px 7px rgba(34,39,73,.1)}
+.event-block.connects-up.connects-down{border-radius:2px;border-top-color:transparent;border-bottom-color:transparent;box-shadow:none}
 .event-block.removing{animation:poof .42s cubic-bezier(.2,.75,.3,1) forwards;pointer-events:none}
 @keyframes pop-in{0%{opacity:0;transform:scale(.84)}70%{opacity:1;transform:scale(1.05)}100%{opacity:1;transform:scale(1)}}
 @keyframes poof{0%{opacity:1;transform:scale(1)}28%{opacity:1;transform:scale(1.12) rotate(2deg);filter:brightness(1.15)}65%{opacity:.6;transform:scale(.86) rotate(-4deg);filter:blur(1px)}100%{opacity:0;transform:scale(.3) translateY(-8px) rotate(8deg);filter:blur(3px)}}

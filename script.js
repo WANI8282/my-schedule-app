@@ -24,6 +24,8 @@
   let pendingUndo = null;
   let pendingUndoTimeout = null;
   let pendingDeleteRenderTimeout = null;
+  let dragScheduleSelection = null;
+  let suppressCellClickUntil = 0;
   const $ = (id) => document.getElementById(id);
   function cleanPresetName(value) {
     return String(value ?? '').replace(/[\p{Extended_Pictographic}\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2300}-\u{23FF}\u{FE0E}\u{FE0F}\u{200D}\u{20E3}\u{1F3FB}-\u{1F3FF}]/gu, '').replace(/\s+/g, ' ').trim();
@@ -224,25 +226,25 @@
       if (selectedPresetId && String(current) === String(selectedPresetId)) removeScheduledEvent(date, time, current, cell);
       else if (selectedPresetId) { scheduleData[date][time] = selectedPresetId; save(); vibrate(); updateUI(); showToast('予定を変更しました'); }
       else removeScheduledEvent(date, time, current, cell);
-    } else if (selectedPresetId) {
-      const startHour = Number(time.split(':')[0]);
-      const timedSlot = time !== 'allday' && Number.isFinite(startHour);
-      const slots = timedSlot ? [startHour, startHour + 1].filter(hour => hour <= 21).map(hour => `${hour}:00`) : [time];
-      let added = 0;
-      slots.forEach((slot, index) => {
-        scheduleData[date] ||= {};
-        if (index > 0 && scheduleData[date][slot] != null) return;
-        if (index > 0 && timedSlot && isSemesterActive) {
-          const weekday = (new Date(`${date}T12:00:00`).getDay() + 6) % 7;
-          if (universitySchedule[weekday] && universitySchedule[weekday].includes(slot)) return;
-        }
-        scheduleData[date][slot] = selectedPresetId;
-        added++;
-      });
-      save(); vibrate(); updateUI();
-      showToast(added > 1 ? '予定を2時間分まとめて追加しました' : '予定を1時間分追加しました');
-    }
+    } else if (selectedPresetId) { scheduleData[date] ||= {}; scheduleData[date][time] = selectedPresetId; save(); vibrate(); updateUI(); showToast('予定を1コマ追加しました'); }
     else { selectedPresetId = null; showToast('追加する種類をメニューから選んでください'); }
+  }
+  function addDraggedRange(date, startTime, endTime) {
+    if (!selectedPresetId || startTime === 'allday' || endTime === 'allday') return;
+    const first = Number(startTime.split(':')[0]), last = Number(endTime.split(':')[0]);
+    const low = Math.min(first, last), high = Math.max(first, last);
+    const weekday = (new Date(`${date}T12:00:00`).getDay() + 6) % 7;
+    let added = 0;
+    scheduleData[date] ||= {};
+    for (let hour = low; hour <= high; hour++) {
+      const slot = `${hour}:00`;
+      if (scheduleData[date][slot] != null) continue;
+      if (isSemesterActive && universitySchedule[weekday] && universitySchedule[weekday].includes(slot)) continue;
+      scheduleData[date][slot] = selectedPresetId;
+      added++;
+    }
+    if (!added) { if (!Object.keys(scheduleData[date]).length) delete scheduleData[date]; showToast('選択範囲に追加できる空きコマがありません'); return; }
+    save(); vibrate(); updateUI(); showToast(`予定を${added}コマ追加しました`);
   }
   function renderWeekView() {
     const days = getWeekDays(currentDate), today = formatDateKey(new Date());
@@ -252,18 +254,38 @@
     let html = '<div class="time-col-label">' + hours.map(h => `<div class="time-label"><span>${h}</span>${periodLabels[h] ? `<small>${periodLabels[h]}</small>` : ''}</div>`).join('') + '</div>';
     days.forEach((d, index) => {
       const key = formatDateKey(d);
-      const cells = hours.map(h => {
+      const cells = hours.map((h, hourIndex) => {
         const id = scheduleData[key] && scheduleData[key][h];
+        const sameAsPrevious = id != null && hourIndex > 0 && String(scheduleData[key] && scheduleData[key][hours[hourIndex - 1]]) === String(id);
+        const sameAsNext = id != null && hourIndex < hours.length - 1 && String(scheduleData[key] && scheduleData[key][hours[hourIndex + 1]]) === String(id);
         const busy = Boolean(isSemesterActive && universitySchedule[index] && universitySchedule[index].includes(h));
         const classes = ['time-cell'];
+        if (id) classes.push('has-event');
+        if (sameAsPrevious) classes.push('event-continues-up');
+        if (sameAsNext) classes.push('event-continues-down');
         if (busy) classes.push('busy');
         if (highlightFreeTime && !id && !busy) classes.push('free-highlight');
-        return `<div class="${classes.join(' ')}" data-date="${key}" data-time="${h}">${id ? eventMarkup(id) : ''}</div>`;
+        const blockClass = `event-block${sameAsPrevious ? ' connects-up' : ''}${sameAsNext ? ' connects-down' : ''}`;
+        return `<div class="${classes.join(' ')}" data-date="${key}" data-time="${h}">${id ? eventMarkup(id, blockClass) : ''}</div>`;
       }).join('');
       html += `<div class="day-col-grid${key === today ? ' today-column' : ''}">${cells}</div>`;
     });
     $('timeline-grid').innerHTML = html;
-    document.querySelectorAll('.time-cell,.all-day-cell').forEach(cell => cell.addEventListener('click', () => handleSlotClick(cell)));
+    document.querySelectorAll('.time-cell,.all-day-cell').forEach(cell => {
+      cell.addEventListener('click', () => {
+        if (Date.now() < suppressCellClickUntil) { suppressCellClickUntil = 0; return; }
+        handleSlotClick(cell);
+      });
+      cell.addEventListener('pointerdown', event => {
+        if (event.pointerType !== 'mouse' || !selectedPresetId || cell.dataset.time === 'allday') return;
+        dragScheduleSelection = { date: cell.dataset.date, startTime: cell.dataset.time, endTime: cell.dataset.time, pointerId: event.pointerId };
+      });
+      cell.addEventListener('pointerenter', event => {
+        if (dragScheduleSelection && event.pointerId === dragScheduleSelection.pointerId && cell.dataset.date === dragScheduleSelection.date && cell.dataset.time !== 'allday') {
+          dragScheduleSelection.endTime = cell.dataset.time;
+        }
+      });
+    });
   }
   function renderMonthView() {
     const grid = $('month-grid'); let html = dayNames.map(n => `<div class="day-head">${n}</div>`).join('');
@@ -300,6 +322,17 @@
   function openDrawer() { $('sidebar').classList.add('open'); $('drawer-scrim').classList.add('open'); $('menu-btn').setAttribute('aria-expanded', 'true'); }
   function closeDrawer() { $('sidebar').classList.remove('open'); $('drawer-scrim').classList.remove('open'); $('menu-btn').setAttribute('aria-expanded', 'false'); }
   function bindEvents() {
+    document.addEventListener('pointerup', event => {
+      if (!dragScheduleSelection || event.pointerId !== dragScheduleSelection.pointerId) return;
+      const drag = dragScheduleSelection;
+      const endCell = document.elementFromPoint(event.clientX, event.clientY)?.closest('.time-cell');
+      dragScheduleSelection = null;
+      if (endCell && endCell.dataset.date === drag.date && endCell.dataset.time !== drag.startTime) {
+        suppressCellClickUntil = Date.now() + 350;
+        addDraggedRange(drag.date, drag.startTime, endCell.dataset.time);
+      }
+    });
+    document.addEventListener('pointercancel', () => { dragScheduleSelection = null; });
     $('btn-week').onclick = () => { currentView = 'week'; updateUI(); closeDrawer(); };
     $('btn-month').onclick = () => { currentView = 'month'; updateUI(); closeDrawer(); };
     $('prev-btn').onclick = () => { if (currentView === 'week') currentDate.setDate(currentDate.getDate() - 7); else currentDate.setMonth(currentDate.getMonth() - 1); updateUI(); };
