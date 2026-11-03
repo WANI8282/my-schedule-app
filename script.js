@@ -139,15 +139,33 @@
     const input = normalizeDigits(text);
     const found = new Set();
     let specified = false;
-    const rangePattern = /(\d{1,2})(?::(\d{2}))?\s*時?\s*(?:から|〜|～|~|－|-|—|to)\s*(\d{1,2})(?::(\d{2}))?\s*時?/gi;
-    const withoutRanges = input.replace(rangePattern, (_, startH, _startM, endH) => {
+    const addDuration = (startMinutes, endMinutes) => {
+      for (let hour = Math.floor(startMinutes / 60); hour * 60 < endMinutes; hour++) {
+        if (hour >= 8 && hour <= 22) found.add(`${hour}:00`);
+      }
+    };
+    const timePart = '(\\d{1,2})(?::([0-5]\\d))?\\s*(?:時(?:\\s*([0-5]?\\d)\\s*分?)?)?';
+    const durationPattern = new RegExp(`${timePart}\\s*(?:から|より)\\s*(\\d+(?:\\.\\d+)?)\\s*(?:時間(?:分)?|h)`, 'gi');
+    const rangePattern = new RegExp(`${timePart}\\s*(?:から|〜|～|~|－|-|—|to)\\s*${timePart}`, 'gi');
+    const consumed = [];
+    for (const match of input.matchAll(durationPattern)) {
+      specified = true; consumed.push([match.index, match.index + match[0].length]);
+      const start = Number(match[1]) * 60 + Number(match[2] || match[3] || 0);
+      const duration = Number(match[4]) * 60;
+      if (Number.isFinite(duration) && duration > 0 && duration <= 24 * 60) addDuration(start, start + duration);
+    }
+    let remaining = input;
+    for (const [start, end] of consumed.reverse()) remaining = `${remaining.slice(0, start)} ${remaining.slice(end)}`;
+    for (const match of remaining.matchAll(rangePattern)) {
       specified = true;
-      const start = Number(startH), end = Number(endH);
-      for (let hour = start; hour < end; hour++) if (hour >= 8 && hour <= 22) found.add(`${hour}:00`);
-      return ' ';
-    });
-    const singlePattern = /(\d{1,2}):([0-5]\d)|(?<![\d/])(\d{1,2})\s*時(?:\s*(\d{1,2})\s*分)?/g;
-    for (const match of withoutRanges.matchAll(singlePattern)) {
+      const start = Number(match[1]) * 60 + Number(match[2] || match[3] || 0);
+      const end = Number(match[4]) * 60 + Number(match[5] || match[6] || 0);
+      if (end > start) addDuration(start, end);
+    }
+    // Remove ranges before scanning standalone start times, so an end time is not added as another event.
+    remaining = remaining.replace(rangePattern, ' ');
+    const singlePattern = /(?<![\d/])(\d{1,2}):([0-5]\d)(?!\d)|(?<![\d/])(\d{1,2})\s*時(?:\s*([0-5]?\d)\s*分?)?/g;
+    for (const match of remaining.matchAll(singlePattern)) {
       specified = true;
       const hour = Number(match[1] || match[3]);
       if (hour >= 8 && hour <= 22) found.add(`${hour}:00`);
@@ -157,7 +175,21 @@
   function cleanInputText(text) { return String(text).replace(/[\p{Extended_Pictographic}\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2300}-\u{23FF}\u{FE0E}\u{FE0F}\u{200D}\u{20E3}\u{1F3FB}-\u{1F3FF}]/gu, '').replace(/\s+/g, ' ').trim(); }
   function addNaturalLanguageEvent(text) {
     const input = normalizeDigits(cleanInputText(text));
-    const preset = presets.find(item => { const name = cleanPresetName(item.name); return name && input.includes(name); });
+    const aliases = [
+      { words: ['呑み', '飲み', '飲み会', 'ごはん', '食事', 'デート', '遊び'], target: '遊び' },
+      { words: ['練習', '部活', 'サークル'], target: 'サークル' },
+      { words: ['シフト', 'アルバイト', 'バイト'], target: 'バイト' },
+      { words: ['旅行', '旅'], target: '旅行' }
+    ];
+    const normalizedPresets = presets.map(item => ({ item, name: cleanPresetName(item.name) })).filter(entry => entry.name);
+    let preset = normalizedPresets.sort((a, b) => b.name.length - a.name.length).find(({ name }) => input.includes(name))?.item;
+    if (!preset) {
+      for (const alias of aliases) {
+        if (!alias.words.some(word => input.includes(word))) continue;
+        preset = normalizedPresets.find(({ name }) => name.includes(alias.target) || alias.target.includes(name))?.item;
+        if (preset) break;
+      }
+    }
     let selected = preset || presets[0];
     if (!selected) {
       selected = { id: Date.now(), name: '予定', color: '#6979c7' };
@@ -171,11 +203,9 @@
     const dateKey = formatDateKey(date);
     const slots = parsedTime.specified ? parsedTime.slots : ['allday'];
     scheduleData[dateKey] ||= {};
-    let added = 0;
-    slots.forEach(slot => {
-      if (scheduleData[dateKey][slot] == null) { scheduleData[dateKey][slot] = selected.id; added++; }
-    });
-    if (!added) { showToast('指定した時間にはすでに予定があります'); return false; }
+    const addedSlots = slots.filter(slot => scheduleData[dateKey][slot] == null);
+    addedSlots.forEach(slot => { scheduleData[dateKey][slot] = selected.id; });
+    if (!addedSlots.length) { if (!Object.keys(scheduleData[dateKey]).length) delete scheduleData[dateKey]; showToast('指定した時間にはすでに予定があります'); return false; }
     currentDate = date;
     currentView = 'week';
     selectedPresetId = null;
@@ -183,7 +213,13 @@
     save(); updateUI(); vibrate();
     closeModal('ai-modal');
     const label = cleanPresetName(selected.name) || '予定';
-    showToast(`AIが${label}の予定を追加しました`);
+    const dateLabel = `${date.getMonth() + 1}/${date.getDate()}`;
+    const slotHours = addedSlots.map(slot => Number(slot.split(':')[0]));
+    const isContinuous = slotHours.every((hour, index) => index === 0 || hour === slotHours[index - 1] + 1);
+    const timeLabel = addedSlots[0] === 'allday' ? '終日' : isContinuous
+      ? `${addedSlots[0]}〜${String(slotHours[slotHours.length - 1] + 1).padStart(2, '0')}:00`
+      : addedSlots.join('・');
+    showToast(`AIが【${dateLabel} ${timeLabel} ${label}】を追加しました`);
     return true;
   }
   function getWeekDays(d) { const start = new Date(d); start.setHours(0, 0, 0, 0); start.setDate(start.getDate() - (start.getDay() === 0 ? 6 : start.getDay() - 1)); return Array.from({ length: 7 }, (_, i) => { const date = new Date(start); date.setDate(start.getDate() + i); return date; }); }
