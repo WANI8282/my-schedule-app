@@ -407,24 +407,29 @@
     $('wage-edit-toggle').onclick = () => {
       const editor = $('wage-editor'), opening = editor.hidden;
       editor.hidden = !opening;
+      editor.classList.toggle('active', opening);
       $('wage-edit-toggle').setAttribute('aria-expanded', String(opening));
       if (opening) { $('wage-input').value = String(hourlyWage); setTimeout(() => $('wage-input').focus(), 0); }
     };
-    $('wage-input').addEventListener('input', event => {
-      const value = Number(event.target.value);
-      if (!Number.isInteger(value) || value < 1 || value > 1000000) return;
-      hourlyWage = value; save(); renderWageEstimate();
-    });
-    $('wage-input').addEventListener('change', event => {
-      const value = Number(event.target.value);
+    $('wage-save').onclick = () => {
+      const value = Number($('wage-input').value);
       if (!Number.isInteger(value) || value < 1 || value > 1000000) {
-        event.target.value = String(hourlyWage);
+        $('wage-input').value = String(hourlyWage);
         showToast('時給は1〜1,000,000円で入力してください');
         return;
       }
-      hourlyWage = value; save(); renderWageEstimate();
-    });
-    $('wage-input').addEventListener('keydown', event => { if (event.key === 'Enter') event.target.blur(); });
+      hourlyWage = value;
+      save(); renderWageEstimate();
+      $('wage-editor').hidden = true; $('wage-editor').classList.remove('active');
+      $('wage-edit-toggle').setAttribute('aria-expanded', 'false');
+      showToast('時給を保存しました');
+    };
+    $('wage-cancel').onclick = () => {
+      $('wage-input').value = String(hourlyWage);
+      $('wage-editor').hidden = true; $('wage-editor').classList.remove('active');
+      $('wage-edit-toggle').setAttribute('aria-expanded', 'false');
+    };
+    $('wage-input').addEventListener('keydown', event => { if (event.key === 'Enter') $('wage-save').click(); });
     document.addEventListener('pointerup', event => {
       if (!dragScheduleSelection || event.pointerId !== dragScheduleSelection.pointerId) return;
       const drag = dragScheduleSelection;

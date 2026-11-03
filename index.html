@@ -30,7 +30,7 @@
         <div class="wage-card-heading"><span>今月のバイト予想</span><span class="wage-rate-control"><span class="wage-rate" id="wage-rate">時給 ¥1,100</span><button class="wage-edit-toggle" id="wage-edit-toggle" type="button" aria-expanded="false" aria-controls="wage-editor">時給変更</button></span></div>
         <strong class="wage-total" id="wage-total">¥0</strong>
         <span class="wage-hours" id="wage-hours">0時間分の予定</span>
-        <div class="wage-editor" id="wage-editor" hidden><label for="wage-input">時給</label><div class="wage-input-wrap"><span>¥</span><input id="wage-input" type="number" min="1" max="1000000" step="1" inputmode="numeric" aria-label="時給を円で入力"><span>/時間</span></div></div>
+        <div class="wage-editor" id="wage-editor" hidden><label for="wage-input">時給（円／時間）</label><div class="wage-editor-row"><div class="wage-input-wrap"><span>¥</span><input id="wage-input" type="number" min="1" max="1000000" step="1" inputmode="numeric" aria-label="時給を円で入力"></div><div class="wage-editor-actions"><button id="wage-cancel" type="button">戻る</button><button id="wage-save" type="button">保存</button></div></div></div>
       </section>
       <button class="settings-btn" id="find-free-btn" aria-pressed="false">空き時間を探す</button>
       <button class="settings-btn" id="copy-week-btn">先週をコピー</button>

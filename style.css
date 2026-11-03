@@ -189,10 +189,15 @@ html[data-theme="dark"] .theme-btn::after{content:"DAY"}
 .wage-rate{color:var(--muted);font-size:8px;font-weight:500;white-space:nowrap}
 .wage-edit-toggle{padding:4px 7px;border:1px solid rgba(255,255,255,.48);border-radius:99px;background:rgba(255,255,255,.28);color:var(--accent);font-size:8px;font-weight:650;white-space:nowrap;cursor:pointer;transition:background .18s,transform .18s}
 .wage-edit-toggle:hover{transform:translateY(-1px);background:rgba(255,255,255,.5)}
-.wage-editor{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:5px;padding:8px 9px;border:1px solid rgba(255,255,255,.42);border-radius:12px;background:rgba(255,255,255,.2);color:var(--muted);font-size:9px}
+.wage-editor{display:flex;flex-direction:column;align-items:stretch;gap:7px;margin-top:5px;padding:9px;border:1px solid rgba(255,255,255,.42);border-radius:12px;background:rgba(255,255,255,.2);color:var(--muted);font-size:9px}
 .wage-editor[hidden]{display:none}
+.wage-editor.active{animation:card-arrive .2s ease-out}
+.wage-editor-row{display:flex;align-items:center;justify-content:space-between;gap:6px}
 .wage-input-wrap{display:flex;align-items:center;gap:5px;padding:4px 7px;border:1px solid rgba(255,255,255,.55);border-radius:9px;background:rgba(255,255,255,.38);color:var(--ink)}
-.wage-input-wrap input{width:82px;padding:2px 0;border:0;outline:0;background:transparent;color:var(--ink);font-size:11px;font-weight:650;text-align:right}
+.wage-input-wrap input{width:74px;padding:2px 0;border:0;outline:0;background:transparent;color:var(--ink);font-size:11px;font-weight:650;text-align:right}
+.wage-editor-actions{display:flex;gap:5px}
+.wage-editor-actions button{padding:5px 9px;border:1px solid rgba(255,255,255,.5);border-radius:99px;background:rgba(255,255,255,.3);color:var(--muted);font-size:8px;font-weight:600;cursor:pointer}
+.wage-editor-actions #wage-save{background:rgba(105,121,199,.16);color:var(--accent);border-color:rgba(105,121,199,.24)}
 .wage-input-wrap input::-webkit-inner-spin-button,.wage-input-wrap input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 .wage-input-wrap input[type=number]{appearance:textfield;-moz-appearance:textfield}
 .wage-total{color:var(--ink);font-size:25px;font-weight:700;letter-spacing:-.7px;line-height:1.2}
@@ -202,6 +207,8 @@ html[data-theme="dark"] .wage-edit-toggle{border-color:rgba(255,255,255,.12);bac
 html[data-theme="dark"] .wage-edit-toggle:hover{background:rgba(255,255,255,.12)}
 html[data-theme="dark"] .wage-editor{border-color:rgba(255,255,255,.09);background:rgba(255,255,255,.035)}
 html[data-theme="dark"] .wage-input-wrap{border-color:rgba(255,255,255,.1);background:rgba(0,0,0,.16);color:var(--ink)}
+html[data-theme="dark"] .wage-editor-actions button{border-color:rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:var(--muted)}
+html[data-theme="dark"] .wage-editor-actions #wage-save{border-color:rgba(165,180,252,.22);background:rgba(165,180,252,.13);color:var(--accent)}
 .next-event-card{display:flex;flex:none;align-items:center;gap:11px;min-height:42px;margin:10px 16px 0;padding:8px 14px;border:1px solid rgba(255,255,255,.52);border-radius:16px;background:linear-gradient(120deg,rgba(255,255,255,.4),rgba(255,255,255,.16));box-shadow:0 6px 18px rgba(48,51,94,.08),inset 0 1px rgba(255,255,255,.56);backdrop-filter:blur(22px) saturate(165%);-webkit-backdrop-filter:blur(22px) saturate(165%);animation:card-arrive .32s ease-out}
 .next-event-label{flex:none;padding:4px 8px;border:1px solid rgba(112,125,185,.16);border-radius:99px;background:rgba(113,129,196,.11);color:var(--accent);font-size:9px;font-weight:700;letter-spacing:.7px}
 .next-event-detail{min-width:0;overflow:hidden;color:var(--ink);font-size:11px;font-weight:600;letter-spacing:.15px;text-overflow:ellipsis;white-space:nowrap}
