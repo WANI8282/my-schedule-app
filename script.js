@@ -25,6 +25,7 @@
   let scheduleData = saved.scheduleData && typeof saved.scheduleData === 'object' ? saved.scheduleData : {};
   let isSemesterActive = typeof saved.isSemesterActive === 'boolean' ? saved.isSemesterActive : true;
   let isDarkMode = saved.isDarkMode === true;
+  let hourlyWage = Number.isInteger(saved.hourlyWage) && saved.hourlyWage > 0 && saved.hourlyWage <= 1000000 ? saved.hourlyWage : 1100;
   let originalTimetablePeriodMode = timetablePeriodMode;
   let currentDate = new Date();
   let currentView = 'week';
@@ -42,7 +43,7 @@
   }
   const escapeHTML = (s) => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
   function save() {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ presets, universitySchedule, scheduleData, isSemesterActive, isDarkMode, timetablePeriodMode })); }
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ presets, universitySchedule, scheduleData, isSemesterActive, isDarkMode, timetablePeriodMode, hourlyWage })); }
     catch (_) { showToast('保存できませんでした。端末の空き容量をご確認ください'); }
   }
   function vibrate() { if ('vibrate' in navigator) navigator.vibrate(10); }
@@ -223,8 +224,11 @@
         });
       });
     }
-    $('wage-total').textContent = `¥${(hoursThisMonth * 1100).toLocaleString('ja-JP')}`;
+    $('wage-rate').textContent = `時給 ¥${hourlyWage.toLocaleString('ja-JP')}`;
+    $('wage-total').textContent = `¥${(hoursThisMonth * hourlyWage).toLocaleString('ja-JP')}`;
     $('wage-hours').textContent = `${hoursThisMonth}時間分の予定`;
+    const wageInput = $('wage-input');
+    if (document.activeElement !== wageInput) wageInput.value = String(hourlyWage);
   }
   function renderNextEvent() {
     const detail = $('next-event-detail');
@@ -400,6 +404,27 @@
   function openDrawer() { $('sidebar').classList.add('open'); $('drawer-scrim').classList.add('open'); $('menu-btn').setAttribute('aria-expanded', 'true'); }
   function closeDrawer() { $('sidebar').classList.remove('open'); $('drawer-scrim').classList.remove('open'); $('menu-btn').setAttribute('aria-expanded', 'false'); }
   function bindEvents() {
+    $('wage-edit-toggle').onclick = () => {
+      const editor = $('wage-editor'), opening = editor.hidden;
+      editor.hidden = !opening;
+      $('wage-edit-toggle').setAttribute('aria-expanded', String(opening));
+      if (opening) { $('wage-input').value = String(hourlyWage); setTimeout(() => $('wage-input').focus(), 0); }
+    };
+    $('wage-input').addEventListener('input', event => {
+      const value = Number(event.target.value);
+      if (!Number.isInteger(value) || value < 1 || value > 1000000) return;
+      hourlyWage = value; save(); renderWageEstimate();
+    });
+    $('wage-input').addEventListener('change', event => {
+      const value = Number(event.target.value);
+      if (!Number.isInteger(value) || value < 1 || value > 1000000) {
+        event.target.value = String(hourlyWage);
+        showToast('時給は1〜1,000,000円で入力してください');
+        return;
+      }
+      hourlyWage = value; save(); renderWageEstimate();
+    });
+    $('wage-input').addEventListener('keydown', event => { if (event.key === 'Enter') event.target.blur(); });
     document.addEventListener('pointerup', event => {
       if (!dragScheduleSelection || event.pointerId !== dragScheduleSelection.pointerId) return;
       const drag = dragScheduleSelection;
