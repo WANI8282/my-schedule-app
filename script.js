@@ -1,7 +1,7 @@
 (() => {
   'use strict';
   const STORAGE_KEY = 'schedule-app-v1';
-  const hours = Array.from({ length: 24 }, (_, i) => `${i}:00`);
+  const HOURS = Array.from({ length: 24 }, (_, i) => `${i}:00`);
   const dayNames = ['月', '火', '水', '木', '金', '土', '日'];
   const classStartTimes = {
     60: [9 * 60, 10 * 60, 11 * 60, 13 * 60, 14 * 60, 15 * 60, 16 * 60],
@@ -349,13 +349,13 @@
     $('week-header').innerHTML = '<div class="day-head"></div>' + days.map(d => `<div class="day-head ${formatDateKey(d) === today ? 'today' : ''}">${dayName(d)} ${d.getDate()}</div>`).join('');
     $('all-day-row').innerHTML = '<div class="all-day-label">終日</div>' + days.map(d => { const key = formatDateKey(d), id = scheduleData[key] && scheduleData[key].allday; return `<div class="all-day-cell" data-date="${key}" data-time="allday">${id ? eventMarkup(id) : ''}</div>`; }).join('');
     const periodLabels = Object.fromEntries(classPeriods.map(period => [`${Math.floor(period.start / 60)}:00`, `${period.label} · ${String(Math.floor(period.start / 60)).padStart(2, '0')}:${String(period.start % 60).padStart(2, '0')}`]));
-    let html = '<div class="time-col-label">' + hours.map(h => `<div class="time-label"><span>${h}</span>${periodLabels[h] ? `<small>${periodLabels[h]}</small>` : ''}</div>`).join('') + '<div class="time-label end-time-label"><span>24:00</span></div></div>';
+    let html = '<div class="time-col-label">' + HOURS.map(h => `<div class="time-label"><span>${h}</span>${periodLabels[h] ? `<small>${periodLabels[h]}</small>` : ''}</div>`).join('') + '<div class="time-label end-time-label"><span>24:00</span></div></div>';
     days.forEach((d, index) => {
       const key = formatDateKey(d);
-      const cells = hours.map((h, hourIndex) => {
+      const cells = HOURS.map((h, hourIndex) => {
         const id = scheduleData[key] && scheduleData[key][h];
-        const sameAsPrevious = id != null && hourIndex > 0 && String(scheduleData[key] && scheduleData[key][hours[hourIndex - 1]]) === String(id);
-        const sameAsNext = id != null && hourIndex < hours.length - 1 && String(scheduleData[key] && scheduleData[key][hours[hourIndex + 1]]) === String(id);
+        const sameAsPrevious = id != null && hourIndex > 0 && String(scheduleData[key] && scheduleData[key][HOURS[hourIndex - 1]]) === String(id);
+        const sameAsNext = id != null && hourIndex < HOURS.length - 1 && String(scheduleData[key] && scheduleData[key][HOURS[hourIndex + 1]]) === String(id);
         const hour = Number(h.split(':')[0]);
         const overlays = isSemesterActive ? periodOverlaysForHour(index, hour) : [];
         const busy = overlays.length > 0;
