@@ -161,7 +161,7 @@ html[data-theme="dark"] .skeleton-head,html[data-theme="dark"] .skeleton-grid{ba
 html[data-theme="dark"] .theme-btn::after{content:"DAY"}
 @media(min-width:768px){.modal-overlay{align-items:center;padding:20px}.modal-content{width:min(100%,520px);max-height:85vh;border-radius:28px}.modal-large{width:min(95vw,850px)}.sidebar{order:-1}}
 @media(max-width:767px){
-  .app-container{display:block;padding:0}
+  .app-container{display:block;padding: max(12px, env(safe-area-inset-top)) 0 0}
   .main-content{width:auto;height:calc(100% - 16px);margin:8px;border-radius:26px}
   .sidebar{position:fixed;z-index:22;top:0;bottom:0;left:0;width:min(82vw,310px);height:auto;padding:calc(22px + env(safe-area-inset-top)) 18px 22px;border-radius:0 24px 24px 0;background:rgba(255,255,255,.7);transform:translateX(-105%);transition:transform .25s cubic-bezier(.2,.8,.2,1);box-shadow:12px 0 34px rgba(38,40,78,.14)}
   .sidebar.open{transform:translateX(0)}
