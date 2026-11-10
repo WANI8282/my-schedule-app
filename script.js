@@ -211,7 +211,7 @@
     currentView = 'week';
     selectedPresetId = null;
     $('btn-cancel-edit').style.display = 'none';
-    save(); updateUI({ scrollToMorning: true }); vibrate();
+    save(); updateUI(); vibrate();
     closeModal('ai-modal');
     const label = cleanPresetName(selected.name) || '予定';
     const dateLabel = `${date.getMonth() + 1}/${date.getDate()}`;
@@ -236,7 +236,7 @@
     });
   }
   function eventMarkup(id, cls = 'event-block') { const p = presetFor(id); return p ? `<div class="${cls}" style="background:${escapeHTML(p.color)}" data-event="true">${escapeHTML(cleanPresetName(p.name))}</div>` : ''; }
-  function updateUI(options = {}) {
+  function updateUI() {
     document.documentElement.dataset.theme = isDarkMode ? 'dark' : 'light';
     $('theme-toggle').textContent = isDarkMode ? 'DAY' : 'NIGHT';
     $('theme-toggle').setAttribute('aria-label', isDarkMode ? 'ライトモードに切り替え' : 'ダークモードに切り替え');
@@ -249,7 +249,7 @@
     if (currentView === 'week') {
       $('calendar-title').textContent = `${currentDate.getFullYear()}年 ${currentDate.getMonth() + 1}月`;
       renderWeekView();
-      if (options.scrollToMorning) requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
         const timeline = document.querySelector('#view-week .timeline-container');
         if (timeline) timeline.scrollTo({ top: 8 * 54, behavior: 'smooth' });
       });
@@ -403,7 +403,7 @@
       html += `<div class="month-day-cell${d.getMonth() !== m ? ' other-month' : ''}${key === today ? ' today' : ''}" data-date="${key}"><div class="month-date">${d.getDate()}</div><div class="month-events">${bars}${more}</div></div>`;
       d.setDate(d.getDate() + 1);
     }
-    grid.innerHTML = html; grid.querySelectorAll('.month-day-cell').forEach(cell => cell.addEventListener('click', () => { currentDate = new Date(`${cell.dataset.date}T12:00:00`); currentView = 'week'; updateUI({ scrollToMorning: true }); }));
+    grid.innerHTML = html; grid.querySelectorAll('.month-day-cell').forEach(cell => cell.addEventListener('click', () => { currentDate = new Date(`${cell.dataset.date}T12:00:00`); currentView = 'week'; updateUI(); }));
   }
   function openModal(id) { $(id).classList.add('active'); vibrate(); }
   function closeModal(id) { $(id).classList.remove('active'); }
@@ -485,7 +485,7 @@
       }
     });
     document.addEventListener('pointercancel', () => { dragScheduleSelection = null; });
-    $('btn-week').onclick = () => { currentView = 'week'; updateUI({ scrollToMorning: true }); closeDrawer(); };
+    $('btn-week').onclick = () => { currentView = 'week'; updateUI(); closeDrawer(); };
     $('btn-month').onclick = () => { currentView = 'month'; updateUI(); closeDrawer(); };
     $('prev-btn').onclick = () => { if (currentView === 'week') currentDate.setDate(currentDate.getDate() - 7); else currentDate.setMonth(currentDate.getMonth() - 1); updateUI(); };
     $('next-btn').onclick = () => { if (currentView === 'week') currentDate.setDate(currentDate.getDate() + 7); else currentDate.setMonth(currentDate.getMonth() + 1); updateUI(); };
@@ -538,7 +538,7 @@
     document.querySelectorAll('.modal-overlay').forEach(overlay => overlay.addEventListener('click', e => { if (e.target === overlay) overlay.id === 'timetable-modal' ? cancelTimetableModal() : closeModal(overlay.id); }));
     document.addEventListener('keydown', e => { if (e.key === 'Escape') { document.querySelectorAll('.modal-overlay.active').forEach(x => x.id === 'timetable-modal' ? cancelTimetableModal() : closeModal(x.id)); closeDrawer(); } });
   }
-  bindEvents(); updateUI({ scrollToMorning: true });
+  bindEvents(); updateUI();
   if (savedPresetNamesNeedCleaning) save();
   setTimeout(() => $('skeleton').classList.add('done'), 500);
   if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
