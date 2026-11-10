@@ -69,7 +69,7 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 .day-col-grid{display:flex;flex-direction:column;border-right:1px solid rgba(255,255,255,.12)}
 .time-cell{height:54px;padding:3px;border-bottom:1px solid rgba(255,255,255,.1)}
 .time-cell.has-event{padding-top:0;padding-bottom:0;border-bottom-color:transparent}
-.time-cell:hover,.all-day-cell:hover,.month-day-cell:hover{z-index:1;background:rgba(255,255,255,.52);box-shadow:inset 0 0 0 1px rgba(255,255,255,.55)}
+@media(hover:hover) and (pointer:fine){.time-cell:hover,.all-day-cell:hover,.month-day-cell:hover{z-index:1;background:rgba(255,255,255,.52);box-shadow:inset 0 0 0 1px rgba(255,255,255,.55)}}
 .time-cell.busy{background:rgba(157,177,208,.055)}
 .class-overlay{position:absolute;z-index:0;top:var(--class-top);left:2px;right:2px;height:var(--class-height);display:flex;align-items:center;justify-content:center;overflow:hidden;border:1px solid rgba(133,161,200,.19);border-radius:5px;background:linear-gradient(120deg,rgba(164,194,225,.2),rgba(255,255,255,.13));color:rgba(75,98,132,.65);font-size:8px;font-weight:600;letter-spacing:.15px;pointer-events:none;backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
 .event-block{position:relative;z-index:1;display:flex;width:100%;height:100%;align-items:center;justify-content:center;overflow:hidden;padding:3px 4px;border:1px solid rgba(255,255,255,.32);border-radius:8px;color:#fff;font-size:10px;font-weight:650;text-overflow:ellipsis;white-space:nowrap;box-shadow:0 3px 10px rgba(34,39,73,.13);animation:pop-in .28s cubic-bezier(.2,.9,.3,1.2)}
@@ -148,7 +148,7 @@ html[data-theme="dark"] .control-panel,html[data-theme="dark"] .grid-header,html
 html[data-theme="dark"] .action-btn.active{background:rgba(255,255,255,.1);color:var(--ink)}
 html[data-theme="dark"] .settings-btn,html[data-theme="dark"] .today-btn,html[data-theme="dark"] .theme-btn,html[data-theme="dark"] .btn-modal-cancel,html[data-theme="dark"] .btn-add-preset,html[data-theme="dark"] .nav-arrow,html[data-theme="dark"] .menu-btn,html[data-theme="dark"] .icon-btn{border-color:rgba(255,255,255,.09);background:linear-gradient(145deg,rgba(255,255,255,.09),rgba(255,255,255,.025));color:var(--ink);box-shadow:0 7px 18px rgba(0,0,0,.16),inset 0 1px rgba(255,255,255,.07)}
 html[data-theme="dark"] .time-cell,html[data-theme="dark"] .all-day-cell,html[data-theme="dark"] .month-day-cell{border-color:rgba(255,255,255,.07);background:rgba(255,255,255,.035)}
-html[data-theme="dark"] .time-cell:hover,html[data-theme="dark"] .all-day-cell:hover,html[data-theme="dark"] .month-day-cell:hover{background:rgba(255,255,255,.1)}
+@media(hover:hover) and (pointer:fine){html[data-theme="dark"] .time-cell:hover,html[data-theme="dark"] .all-day-cell:hover,html[data-theme="dark"] .month-day-cell:hover{background:rgba(255,255,255,.1)}}
 html[data-theme="dark"] .time-cell.busy{background:rgba(126,155,201,.055)}
 html[data-theme="dark"] .class-overlay{border-color:rgba(164,190,232,.17);background:linear-gradient(120deg,rgba(106,143,194,.17),rgba(255,255,255,.055));color:rgba(203,218,244,.66)}
 html[data-theme="dark"] .tt-period-check{border-color:rgba(255,255,255,.08);background:rgba(255,255,255,.035)}
@@ -222,24 +222,24 @@ html[data-theme="dark"] .next-event-detail{color:var(--ink)}
 .day-head.today{border-radius:99px;background:rgba(86,112,190,.12);color:#4f64b1;font-weight:750;box-shadow:inset 0 0 0 1px rgba(86,112,190,.08)}
 .day-col-grid.today-column{background:rgba(86,112,190,.035)}
 .day-col-grid.today-column .time-cell{box-shadow:inset 0 0 0 999px rgba(86,112,190,.045)}
-.day-col-grid.today-column .time-cell:hover{box-shadow:inset 0 0 0 999px rgba(86,112,190,.09)}
+@media(hover:hover) and (pointer:fine){.day-col-grid.today-column .time-cell:hover{box-shadow:inset 0 0 0 999px rgba(86,112,190,.09)}}
 .month-day-cell.today{border:1px solid rgba(86,112,190,.32);background:rgba(255,255,255,.27);box-shadow:inset 0 0 0 1px rgba(255,255,255,.26),inset 0 0 22px rgba(86,112,190,.11)}
 .month-day-cell.today .month-date{color:#4f64b1;font-weight:750}
 .month-day-cell.today:hover{background:rgba(255,255,255,.42);box-shadow:inset 0 0 0 1px rgba(86,112,190,.25),inset 0 0 24px rgba(86,112,190,.14)}
 html[data-theme="dark"] .day-head.today{background:rgba(143,164,255,.15);color:#c1ccff;box-shadow:inset 0 0 0 1px rgba(143,164,255,.12)}
 html[data-theme="dark"] .day-col-grid.today-column{background:rgba(143,164,255,.035)}
 html[data-theme="dark"] .day-col-grid.today-column .time-cell{box-shadow:inset 0 0 0 999px rgba(143,164,255,.045)}
-html[data-theme="dark"] .day-col-grid.today-column .time-cell:hover{box-shadow:inset 0 0 0 999px rgba(143,164,255,.09)}
+@media(hover:hover) and (pointer:fine){html[data-theme="dark"] .day-col-grid.today-column .time-cell:hover{box-shadow:inset 0 0 0 999px rgba(143,164,255,.09)}}
 html[data-theme="dark"] .month-day-cell.today{border-color:rgba(143,164,255,.35);background:rgba(143,164,255,.09);box-shadow:inset 0 0 0 1px rgba(255,255,255,.06),inset 0 0 24px rgba(143,164,255,.13)}
 html[data-theme="dark"] .month-day-cell.today .month-date{color:#c1ccff}
 .time-cell.free-highlight{z-index:1;background:linear-gradient(145deg,rgba(255,231,145,.42),rgba(255,246,207,.25));border-color:rgba(231,190,75,.44);box-shadow:inset 0 0 0 1px rgba(255,255,255,.42),inset 0 0 18px rgba(255,210,91,.2),0 0 12px rgba(244,199,74,.14);animation:free-slot-pulse 1.65s ease-in-out infinite alternate}
 .day-col-grid.today-column .time-cell.free-highlight{box-shadow:inset 0 0 0 1px rgba(255,255,255,.42),inset 0 0 18px rgba(255,210,91,.2),0 0 12px rgba(244,199,74,.14)}
-.time-cell.free-highlight:hover,.day-col-grid.today-column .time-cell.free-highlight:hover{background:linear-gradient(145deg,rgba(255,236,164,.62),rgba(255,249,224,.4));box-shadow:inset 0 0 0 1px rgba(255,255,255,.72),inset 0 0 22px rgba(255,210,91,.3),0 0 16px rgba(244,199,74,.22)}
+@media(hover:hover) and (pointer:fine){.time-cell.free-highlight:hover,.day-col-grid.today-column .time-cell.free-highlight:hover{background:linear-gradient(145deg,rgba(255,236,164,.62),rgba(255,249,224,.4));box-shadow:inset 0 0 0 1px rgba(255,255,255,.72),inset 0 0 22px rgba(255,210,91,.3),0 0 16px rgba(244,199,74,.22)}}
 @keyframes free-slot-pulse{from{filter:saturate(.92);box-shadow:inset 0 0 0 1px rgba(255,255,255,.38),inset 0 0 12px rgba(255,210,91,.14),0 0 7px rgba(244,199,74,.1)}to{filter:saturate(1.08);box-shadow:inset 0 0 0 1px rgba(255,255,255,.58),inset 0 0 20px rgba(255,210,91,.28),0 0 15px rgba(244,199,74,.22)}}
 .settings-btn.is-active{border-color:rgba(218,174,55,.66);background:linear-gradient(135deg,rgba(255,239,174,.68),rgba(255,255,255,.4));color:#66521c;box-shadow:0 7px 20px rgba(190,148,43,.16),inset 0 0 0 1px rgba(255,255,255,.55)}
 html[data-theme="dark"] .time-cell.free-highlight{background:linear-gradient(145deg,rgba(134,103,26,.48),rgba(116,99,48,.29));border-color:rgba(239,205,98,.44);box-shadow:inset 0 0 0 1px rgba(255,242,193,.18),inset 0 0 19px rgba(238,191,57,.2),0 0 13px rgba(236,188,55,.16);animation:free-slot-pulse-dark 1.65s ease-in-out infinite alternate}
 html[data-theme="dark"] .day-col-grid.today-column .time-cell.free-highlight{box-shadow:inset 0 0 0 1px rgba(255,242,193,.18),inset 0 0 19px rgba(238,191,57,.2),0 0 13px rgba(236,188,55,.16)}
-html[data-theme="dark"] .time-cell.free-highlight:hover,html[data-theme="dark"] .day-col-grid.today-column .time-cell.free-highlight:hover{background:linear-gradient(145deg,rgba(156,122,31,.62),rgba(134,114,53,.38));box-shadow:inset 0 0 0 1px rgba(255,242,193,.3),inset 0 0 23px rgba(238,191,57,.3),0 0 16px rgba(236,188,55,.24)}
+@media(hover:hover) and (pointer:fine){html[data-theme="dark"] .time-cell.free-highlight:hover,html[data-theme="dark"] .day-col-grid.today-column .time-cell.free-highlight:hover{background:linear-gradient(145deg,rgba(156,122,31,.62),rgba(134,114,53,.38));box-shadow:inset 0 0 0 1px rgba(255,242,193,.3),inset 0 0 23px rgba(238,191,57,.3),0 0 16px rgba(236,188,55,.24)}}
 html[data-theme="dark"] .settings-btn.is-active{border-color:rgba(239,205,98,.5);background:linear-gradient(135deg,rgba(118,94,32,.65),rgba(86,74,40,.46));color:#ffe69a;box-shadow:0 7px 20px rgba(0,0,0,.22),inset 0 0 0 1px rgba(255,242,193,.12)}
 @keyframes free-slot-pulse-dark{from{filter:saturate(.92);box-shadow:inset 0 0 0 1px rgba(255,242,193,.13),inset 0 0 12px rgba(238,191,57,.14),0 0 7px rgba(236,188,55,.1)}to{filter:saturate(1.1);box-shadow:inset 0 0 0 1px rgba(255,242,193,.28),inset 0 0 22px rgba(238,191,57,.29),0 0 16px rgba(236,188,55,.24)}}
 @media(prefers-reduced-motion:reduce){.time-cell.free-highlight{animation:none}}
