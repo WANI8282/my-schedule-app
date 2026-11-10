@@ -1,7 +1,7 @@
 (() => {
   'use strict';
   const STORAGE_KEY = 'schedule-app-v1';
-  const hours = Array.from({ length: 15 }, (_, i) => `${i + 8}:00`);
+  const hours = Array.from({ length: 24 }, (_, i) => `${i}:00`);
   const dayNames = ['月', '火', '水', '木', '金', '土', '日'];
   const classStartTimes = {
     60: [9 * 60, 10 * 60, 11 * 60, 13 * 60, 14 * 60, 15 * 60, 16 * 60],
@@ -142,7 +142,7 @@
     let specified = false;
     const addDuration = (startMinutes, endMinutes) => {
       for (let hour = Math.floor(startMinutes / 60); hour * 60 < endMinutes; hour++) {
-        if (hour >= 8 && hour <= 22) found.add(`${hour}:00`);
+        if (hour >= 0 && hour <= 23) found.add(`${hour}:00`);
       }
     };
     const timePart = '(\\d{1,2})(?::([0-5]\\d))?\\s*(?:時(?:\\s*([0-5]?\\d)\\s*分?)?)?';
@@ -169,7 +169,7 @@
     for (const match of remaining.matchAll(singlePattern)) {
       specified = true;
       const hour = Number(match[1] || match[3]);
-      if (hour >= 8 && hour <= 22) found.add(`${hour}:00`);
+      if (hour >= 0 && hour <= 23) found.add(`${hour}:00`);
     }
     return { slots: [...found].sort((a, b) => Number(a.split(':')[0]) - Number(b.split(':')[0])), specified };
   }
@@ -199,7 +199,7 @@
     const date = parseNaturalDate(input);
     const parsedTime = parseNaturalTimes(input);
     if (parsedTime.specified && !parsedTime.slots.length) {
-      showToast('予定は8時から23時の範囲で指定してください'); return false;
+      showToast('予定は0時から24時の範囲で指定してください'); return false;
     }
     const dateKey = formatDateKey(date);
     const slots = parsedTime.specified ? parsedTime.slots : ['allday'];
@@ -211,7 +211,7 @@
     currentView = 'week';
     selectedPresetId = null;
     $('btn-cancel-edit').style.display = 'none';
-    save(); updateUI(); vibrate();
+    save(); updateUI({ scrollToMorning: true }); vibrate();
     closeModal('ai-modal');
     const label = cleanPresetName(selected.name) || '予定';
     const dateLabel = `${date.getMonth() + 1}/${date.getDate()}`;
@@ -236,7 +236,7 @@
     });
   }
   function eventMarkup(id, cls = 'event-block') { const p = presetFor(id); return p ? `<div class="${cls}" style="background:${escapeHTML(p.color)}" data-event="true">${escapeHTML(cleanPresetName(p.name))}</div>` : ''; }
-  function updateUI() {
+  function updateUI(options = {}) {
     document.documentElement.dataset.theme = isDarkMode ? 'dark' : 'light';
     $('theme-toggle').textContent = isDarkMode ? 'DAY' : 'NIGHT';
     $('theme-toggle').setAttribute('aria-label', isDarkMode ? 'ライトモードに切り替え' : 'ダークモードに切り替え');
@@ -246,7 +246,14 @@
     renderPalette(); $('btn-week').classList.toggle('active', currentView === 'week'); $('btn-month').classList.toggle('active', currentView === 'month');
     renderNextEvent();
     $('view-week').classList.toggle('hidden', currentView !== 'week'); $('view-month').classList.toggle('hidden', currentView !== 'month');
-    if (currentView === 'week') { $('calendar-title').textContent = `${currentDate.getFullYear()}年 ${currentDate.getMonth() + 1}月`; renderWeekView(); }
+    if (currentView === 'week') {
+      $('calendar-title').textContent = `${currentDate.getFullYear()}年 ${currentDate.getMonth() + 1}月`;
+      renderWeekView();
+      if (options.scrollToMorning) requestAnimationFrame(() => {
+        const timeline = document.querySelector('#view-week .timeline-container');
+        if (timeline) timeline.scrollTo({ top: 8 * 54, behavior: 'smooth' });
+      });
+    }
     else { $('calendar-title').textContent = `${currentDate.getFullYear()}年 ${currentDate.getMonth() + 1}月`; renderMonthView(); }
   }
   function renderWageEstimate() {
@@ -342,7 +349,7 @@
     $('week-header').innerHTML = '<div class="day-head"></div>' + days.map(d => `<div class="day-head ${formatDateKey(d) === today ? 'today' : ''}">${dayName(d)} ${d.getDate()}</div>`).join('');
     $('all-day-row').innerHTML = '<div class="all-day-label">終日</div>' + days.map(d => { const key = formatDateKey(d), id = scheduleData[key] && scheduleData[key].allday; return `<div class="all-day-cell" data-date="${key}" data-time="allday">${id ? eventMarkup(id) : ''}</div>`; }).join('');
     const periodLabels = Object.fromEntries(classPeriods.map(period => [`${Math.floor(period.start / 60)}:00`, `${period.label} · ${String(Math.floor(period.start / 60)).padStart(2, '0')}:${String(period.start % 60).padStart(2, '0')}`]));
-    let html = '<div class="time-col-label">' + hours.map(h => `<div class="time-label"><span>${h}</span>${periodLabels[h] ? `<small>${periodLabels[h]}</small>` : ''}</div>`).join('') + '<div class="time-label end-time-label"><span>23:00</span></div></div>';
+    let html = '<div class="time-col-label">' + hours.map(h => `<div class="time-label"><span>${h}</span>${periodLabels[h] ? `<small>${periodLabels[h]}</small>` : ''}</div>`).join('') + '<div class="time-label end-time-label"><span>24:00</span></div></div>';
     days.forEach((d, index) => {
       const key = formatDateKey(d);
       const cells = hours.map((h, hourIndex) => {
@@ -396,7 +403,7 @@
       html += `<div class="month-day-cell${d.getMonth() !== m ? ' other-month' : ''}${key === today ? ' today' : ''}" data-date="${key}"><div class="month-date">${d.getDate()}</div><div class="month-events">${bars}${more}</div></div>`;
       d.setDate(d.getDate() + 1);
     }
-    grid.innerHTML = html; grid.querySelectorAll('.month-day-cell').forEach(cell => cell.addEventListener('click', () => { currentDate = new Date(`${cell.dataset.date}T12:00:00`); currentView = 'week'; updateUI(); }));
+    grid.innerHTML = html; grid.querySelectorAll('.month-day-cell').forEach(cell => cell.addEventListener('click', () => { currentDate = new Date(`${cell.dataset.date}T12:00:00`); currentView = 'week'; updateUI({ scrollToMorning: true }); }));
   }
   function openModal(id) { $(id).classList.add('active'); vibrate(); }
   function closeModal(id) { $(id).classList.remove('active'); }
@@ -478,7 +485,7 @@
       }
     });
     document.addEventListener('pointercancel', () => { dragScheduleSelection = null; });
-    $('btn-week').onclick = () => { currentView = 'week'; updateUI(); closeDrawer(); };
+    $('btn-week').onclick = () => { currentView = 'week'; updateUI({ scrollToMorning: true }); closeDrawer(); };
     $('btn-month').onclick = () => { currentView = 'month'; updateUI(); closeDrawer(); };
     $('prev-btn').onclick = () => { if (currentView === 'week') currentDate.setDate(currentDate.getDate() - 7); else currentDate.setMonth(currentDate.getMonth() - 1); updateUI(); };
     $('next-btn').onclick = () => { if (currentView === 'week') currentDate.setDate(currentDate.getDate() + 7); else currentDate.setMonth(currentDate.getMonth() + 1); updateUI(); };
@@ -531,7 +538,7 @@
     document.querySelectorAll('.modal-overlay').forEach(overlay => overlay.addEventListener('click', e => { if (e.target === overlay) overlay.id === 'timetable-modal' ? cancelTimetableModal() : closeModal(overlay.id); }));
     document.addEventListener('keydown', e => { if (e.key === 'Escape') { document.querySelectorAll('.modal-overlay.active').forEach(x => x.id === 'timetable-modal' ? cancelTimetableModal() : closeModal(x.id)); closeDrawer(); } });
   }
-  bindEvents(); updateUI();
+  bindEvents(); updateUI({ scrollToMorning: true });
   if (savedPresetNamesNeedCleaning) save();
   setTimeout(() => $('skeleton').classList.add('done'), 500);
   if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {

@@ -59,8 +59,8 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 .all-day-label{display:flex;align-items:center;justify-content:center;border-right:1px solid rgba(255,255,255,.12);color:var(--muted);font-size:9px}
 .all-day-cell,.time-cell,.month-day-cell{position:relative;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.12);transition:background .2s ease,box-shadow .2s ease;cursor:pointer}
 .all-day-cell{padding:3px}
-.timeline-container{flex:1;overflow:auto}
-.timeline-grid{min-height:100%}
+.timeline-container{flex:1;min-height:0;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;touch-action:pan-y}
+.timeline-grid{min-height:1296px}
 .time-col-label{border-right:1px solid rgba(255,255,255,.12)}
 .time-label{position:relative;display:block;height:54px;padding:0;color:var(--muted);font-size:9px}
 .time-label>span{position:absolute;top:0;right:5px;transform:translateY(-50%);white-space:nowrap}
@@ -164,7 +164,7 @@ html[data-theme="dark"] .theme-btn::after{content:"DAY"}
 @media(min-width:768px){.modal-overlay{align-items:center;padding:20px}.modal-content{width:min(100%,520px);max-height:85vh;border-radius:28px}.modal-large{width:min(95vw,850px)}.sidebar{order:-1}}
 @media(max-width:767px){
   .app-container{display:block;padding:max(8px, env(safe-area-inset-top)) 0 0}
-  .main-content{width:auto;height:calc(100% - 16px);margin:8px;padding-bottom:calc(20px + env(safe-area-inset-bottom));border-bottom:0;box-shadow:none;border-radius:26px}
+  .main-content{width:auto;height:calc(100% - 16px);margin:8px;padding-bottom:calc(20px + env(safe-area-inset-bottom));overflow-y:auto!important;-webkit-overflow-scrolling:touch;border-bottom:0;box-shadow:none;border-radius:26px}
   .sidebar{position:fixed;z-index:22;top:0;bottom:0;left:0;width:min(82vw,310px);height:auto;padding:calc(22px + env(safe-area-inset-top)) 18px 22px;border-radius:0 24px 24px 0;background:rgba(255,255,255,.7);transform:translateX(-105%);transition:transform .25s cubic-bezier(.2,.8,.2,1);box-shadow:12px 0 34px rgba(38,40,78,.14)}
   .sidebar.open{transform:translateX(0)}
   .drawer-scrim.open{position:fixed;z-index:21;inset:0;display:block;background:rgba(22,25,42,.23);backdrop-filter:blur(3px)}
