@@ -1,10 +1,11 @@
 (() => {
   'use strict';
   const STORAGE_KEY = 'schedule-app-v1';
+  const TIMETABLE_SCHEMA_VERSION = 2;
   const HOURS = Array.from({ length: 24 }, (_, i) => `${i}:00`);
   const dayNames = ['月', '火', '水', '木', '金', '土', '日'];
   const classStartTimes = {
-    60: [9 * 60, 10 * 60, 11 * 60, 13 * 60, 14 * 60, 15 * 60, 16 * 60],
+    60: Array.from({ length: 10 }, (_, index) => (9 + index) * 60),
     90: [9 * 60, 10 * 60 + 40, 13 * 60, 14 * 60 + 40, 16 * 60 + 20]
   };
   function buildClassPeriods(minutes) {
@@ -12,7 +13,7 @@
   }
   const defaults = {
     presets: [{ id: 1, name: 'バイト', color: '#f39b38' }, { id: 2, name: 'サークル', color: '#45a878' }, { id: 3, name: '遊び', color: '#e36c86' }, { id: 4, name: '旅行', color: '#9074d5' }],
-    universitySchedule: { 1: ['P2', 'P4'], 2: ['P2'] },
+    universitySchedule: { 1: ['P2', 'P5'], 2: ['P2'] },
     scheduleData: {}, isSemesterActive: true
   };
   let saved = {};
@@ -21,7 +22,24 @@
   let classPeriods = buildClassPeriods(timetablePeriodMode);
   const savedPresetNamesNeedCleaning = Array.isArray(saved.presets) && saved.presets.some(p => p && cleanPresetName(p.name) !== p.name);
   let presets = Array.isArray(saved.presets) ? saved.presets.filter(p => p && typeof p === 'object').map(p => ({ ...p, name: cleanPresetName(p.name) })) : defaults.presets;
-  let universitySchedule = saved.universitySchedule && typeof saved.universitySchedule === 'object' ? saved.universitySchedule : defaults.universitySchedule;
+  function normalizeUniversitySchedule(source, shouldMigrateLegacy60 = false) {
+    const old60PeriodMap = { P1: 'P1', P2: 'P2', P3: 'P3', P4: 'P5', P5: 'P6', P6: 'P7', P7: 'P8' };
+    const validPeriodId = /^P(?:[1-9]|10)$/;
+    return Object.fromEntries(Array.from({ length: 7 }, (_, day) => {
+      const values = Array.isArray(source && source[day]) ? source[day] : [];
+      const normalized = values.map(value => {
+        if (typeof value !== 'string') return null;
+        if (shouldMigrateLegacy60 && old60PeriodMap[value]) return old60PeriodMap[value];
+        return validPeriodId.test(value) || /^\d{1,2}:\d{2}$/.test(value) ? value : null;
+      }).filter(Boolean);
+      return [day, [...new Set(normalized)]];
+    }));
+  }
+  const hasSavedTimetable = saved.universitySchedule && typeof saved.universitySchedule === 'object';
+  let universitySchedule = normalizeUniversitySchedule(
+    hasSavedTimetable ? saved.universitySchedule : defaults.universitySchedule,
+    hasSavedTimetable && timetablePeriodMode === 60 && Number(saved.timetableSchemaVersion || 0) < TIMETABLE_SCHEMA_VERSION
+  );
   let scheduleData = saved.scheduleData && typeof saved.scheduleData === 'object' ? saved.scheduleData : {};
   let isSemesterActive = typeof saved.isSemesterActive === 'boolean' ? saved.isSemesterActive : true;
   let isDarkMode = saved.isDarkMode === true;
@@ -43,7 +61,7 @@
   }
   const escapeHTML = (s) => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
   function save() {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ presets, universitySchedule, scheduleData, isSemesterActive, isDarkMode, timetablePeriodMode, hourlyWage })); }
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ presets, universitySchedule, scheduleData, isSemesterActive, isDarkMode, timetablePeriodMode, timetableSchemaVersion: TIMETABLE_SCHEMA_VERSION, hourlyWage })); }
     catch (_) { showToast('保存できませんでした。端末の空き容量をご確認ください'); }
   }
   function vibrate() { if ('vibrate' in navigator) navigator.vibrate(10); }

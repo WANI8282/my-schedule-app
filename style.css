@@ -116,7 +116,8 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 .period-length-btn small{font-size:8px;font-weight:500;opacity:.78}
 .period-length-btn.active{border-color:rgba(255,255,255,.62);background:rgba(255,255,255,.68);color:var(--ink);box-shadow:0 3px 12px rgba(42,48,88,.1),inset 0 1px rgba(255,255,255,.8)}
 .period-length-btn:active{transform:scale(.98)}
-.timetable-editor{margin-bottom:13px;overflow:auto}
+.timetable-editor{flex:1 1 auto;min-height:0;max-height:min(44vh,440px);margin-bottom:13px;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+#timetable-modal .modal-content{min-height:0}
 .tt-grid{display:grid;grid-template-columns:52px repeat(7,minmax(29px,1fr));gap:4px}
 .tt-header{padding:5px 0;font-size:10px;font-weight:650;text-align:center}
 .tt-time{padding-top:6px;color:var(--muted);font-size:9px;text-align:center}
