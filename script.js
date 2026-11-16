@@ -254,7 +254,9 @@
     });
   }
   function eventMarkup(id, cls = 'event-block') { const p = presetFor(id); return p ? `<div class="${cls}" style="background:${escapeHTML(p.color)}" data-event="true">${escapeHTML(cleanPresetName(p.name))}</div>` : ''; }
-  function updateUI() {
+  function updateUI(options = {}) {
+    const previousTimeline = document.querySelector('#view-week .timeline-container');
+    const previousScrollTop = previousTimeline ? previousTimeline.scrollTop : null;
     document.documentElement.dataset.theme = isDarkMode ? 'dark' : 'light';
     $('theme-toggle').textContent = isDarkMode ? 'DAY' : 'NIGHT';
     $('theme-toggle').setAttribute('aria-label', isDarkMode ? 'ライトモードに切り替え' : 'ダークモードに切り替え');
@@ -269,7 +271,9 @@
       renderWeekView();
       requestAnimationFrame(() => {
         const timeline = document.querySelector('#view-week .timeline-container');
-        if (timeline) timeline.scrollTo({ top: 8 * 54, behavior: 'smooth' });
+        if (!timeline) return;
+        if (options.scrollToMorning) timeline.scrollTo({ top: 8 * 54, behavior: 'smooth' });
+        else if (previousScrollTop !== null) timeline.scrollTop = previousScrollTop;
       });
     }
     else { $('calendar-title').textContent = `${currentDate.getFullYear()}年 ${currentDate.getMonth() + 1}月`; renderMonthView(); }
@@ -507,7 +511,7 @@
     $('btn-month').onclick = () => { currentView = 'month'; updateUI(); closeDrawer(); };
     $('prev-btn').onclick = () => { if (currentView === 'week') currentDate.setDate(currentDate.getDate() - 7); else currentDate.setMonth(currentDate.getMonth() - 1); updateUI(); };
     $('next-btn').onclick = () => { if (currentView === 'week') currentDate.setDate(currentDate.getDate() + 7); else currentDate.setMonth(currentDate.getMonth() + 1); updateUI(); };
-    $('today-btn').onclick = () => { currentDate = new Date(); currentDate.setHours(12, 0, 0, 0); updateUI(); };
+    $('today-btn').onclick = () => { currentDate = new Date(); currentDate.setHours(12, 0, 0, 0); updateUI({ scrollToMorning: true }); };
     $('theme-toggle').onclick = () => { isDarkMode = !isDarkMode; save(); updateUI(); vibrate(); };
     $('find-free-btn').onclick = () => {
       highlightFreeTime = !highlightFreeTime;
@@ -556,7 +560,7 @@
     document.querySelectorAll('.modal-overlay').forEach(overlay => overlay.addEventListener('click', e => { if (e.target === overlay) overlay.id === 'timetable-modal' ? cancelTimetableModal() : closeModal(overlay.id); }));
     document.addEventListener('keydown', e => { if (e.key === 'Escape') { document.querySelectorAll('.modal-overlay.active').forEach(x => x.id === 'timetable-modal' ? cancelTimetableModal() : closeModal(x.id)); closeDrawer(); } });
   }
-  bindEvents(); updateUI();
+  bindEvents(); updateUI({ scrollToMorning: true });
   if (savedPresetNamesNeedCleaning) save();
   setTimeout(() => $('skeleton').classList.add('done'), 500);
   if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
