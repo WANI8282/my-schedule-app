@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 180" width="640" height="180">
+  <defs>
+    <!-- カレンダー本体のパステルガラスグラデーション -->
+    <linearGradient id="glassBody" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F5EEFF" stop-opacity="0.92" />
+      <stop offset="50%" stop-color="#E5EBFF" stop-opacity="0.90" />
+      <stop offset="100%" stop-color="#E0F2FE" stop-opacity="0.94" />
+    </linearGradient>
+    <!-- カレンダー上部のヘッダーガラス -->
+    <linearGradient id="glassHeader" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#DDD6FE" stop-opacity="0.85" />
+      <stop offset="100%" stop-color="#BAE6FD" stop-opacity="0.85" />
+    </linearGradient>
+    <!-- ガラスの縁のハイライト枠線 -->
+    <linearGradient id="glassBorder" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="1" />
+      <stop offset="50%" stop-color="#C7D2FE" stop-opacity="0.85" />
+      <stop offset="100%" stop-color="#93C5FD" stop-opacity="0.95" />
+    </linearGradient>
+    <!-- オレンジのプリセットピルボタン -->
+    <linearGradient id="orangePill" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FB923C" />
+      <stop offset="100%" stop-color="#F59E0B" />
+    </linearGradient>
+  </defs>
+
+  <!-- カレンダーアイコン本体（PowerPoint対応版） -->
+  <g transform="translate(24, 18)">
+    <!-- ベースカード -->
+    <rect x="0" y="14" width="128" height="122" rx="24" fill="url(#glassBody)" stroke="url(#glassBorder)" stroke-width="3" />
+    <!-- 上部ヘッダー帯 -->
+    <path d="M 0 38 A 24 24 0 0 1 24 14 L 104 14 A 24 24 0 0 1 128 38 L 128 48 L 0 48 Z" fill="url(#glassHeader)" />
+    <line x1="2" y1="48" x2="126" y2="48" stroke="#FFFFFF" stroke-opacity="0.9" stroke-width="2" />
+
+    <!-- 上部の留め具（タブ）2本 -->
+    <rect x="30" y="2" width="14" height="26" rx="7" fill="url(#glassBody)" stroke="url(#glassBorder)" stroke-width="2.5" />
+    <rect x="84" y="2" width="14" height="26" rx="7" fill="url(#glassBody)" stroke="url(#glassBorder)" stroke-width="2.5" />
+
+    <!-- 3x2 カレンダーグリッド線 -->
+    <line x1="43" y1="48" x2="43" y2="134" stroke="#FFFFFF" stroke-opacity="0.85" stroke-width="2" />
+    <line x1="85" y1="48" x2="85" y2="134" stroke="#FFFFFF" stroke-opacity="0.85" stroke-width="2" />
+    <line x1="2" y1="91" x2="126" y2="91" stroke="#FFFFFF" stroke-opacity="0.85" stroke-width="2" />
+
+    <!-- タップ波紋（同心円） -->
+    <circle cx="103" cy="112" r="24" fill="none" stroke="#FB923C" stroke-opacity="0.4" stroke-width="2" />
+    <circle cx="103" cy="112" r="33" fill="none" stroke="#FB923C" stroke-opacity="0.2" stroke-width="1.5" />
+
+    <!-- オレンジの予定ピルブロック -->
+    <rect x="88" y="102" width="30" height="20" rx="10" fill="url(#orangePill)" />
+  </g>
+
+  <!-- ロゴタイプ：TapSchedule -->
+  <text x="182" y="108" font-family="&#39;Helvetica Neue&#39;, Arial, sans-serif" font-size="56" font-weight="600" letter-spacing="-0.02em" fill="#1E293B">
+    TapSchedule
+  </text>
+</svg>

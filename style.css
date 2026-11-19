@@ -21,7 +21,8 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 .app-container{position:relative;display:flex;gap:20px;width:100%;height:100dvh;padding:20px;overflow:hidden;background:transparent;color:var(--ink);box-shadow:none;border:0}
 .sidebar,.main-content,.preset-palette,.modal-content{background:var(--glass);backdrop-filter:blur(26px) saturate(165%);-webkit-backdrop-filter:blur(26px) saturate(165%);border:1px solid rgba(255,255,255,.48);box-shadow:var(--shadow)}
 .sidebar{z-index:2;display:flex;flex:0 0 276px;flex-direction:column;gap:18px;width:276px;height:100%;padding:24px 18px;border-radius:28px;overflow-y:auto}
-.brand{padding:3px 4px;font-size:17px;font-weight:700;letter-spacing:1.1px;color:var(--ink)}
+.brand{display:flex;align-items:center;min-height:38px;padding:3px 4px}
+.app-logo{display:block;width:auto;height:32px;max-width:100%;object-fit:contain}
 .control-panel{display:flex;gap:4px;padding:4px;border:1px solid rgba(255,255,255,.4);border-radius:99px;background:rgba(255,255,255,.19)}
 .action-btn{flex:1;padding:9px 12px;border:0;border-radius:99px;background:transparent;color:var(--muted);font-size:12px;font-weight:600;letter-spacing:.5px;transition:background .2s,color .2s,transform .2s}
 .action-btn.active{background:rgba(255,255,255,.58);color:var(--ink);box-shadow:0 3px 12px rgba(48,50,93,.08)}
@@ -145,7 +146,8 @@ html[data-theme="dark"]{color-scheme:dark;--ink:#ececf4;--muted:#999aaa;--line:r
 html[data-theme="dark"] body{color:var(--ink);background:#0a0a0c;background-image:radial-gradient(ellipse at 0 0,rgba(89,56,105,.33),transparent 48%),radial-gradient(ellipse at 100% 0,rgba(47,60,112,.38),transparent 48%),radial-gradient(ellipse at 100% 100%,rgba(25,92,108,.28),transparent 48%),radial-gradient(ellipse at 0 100%,rgba(88,49,75,.25),transparent 48%),linear-gradient(140deg,#0a0a0c,#11131b 55%,#0b1117);background-attachment:fixed}
 html[data-theme="dark"] .app-container{color:var(--ink)}
 html[data-theme="dark"] .sidebar,html[data-theme="dark"] .main-content,html[data-theme="dark"] .preset-palette,html[data-theme="dark"] .modal-content{background:var(--glass);border-color:rgba(255,255,255,.08);box-shadow:var(--shadow)}
-html[data-theme="dark"] .brand,html[data-theme="dark"] .calendar-header h1,html[data-theme="dark"] .palette-header h3,html[data-theme="dark"] .month-date{color:var(--ink)}
+html[data-theme="dark"] .app-logo{filter:drop-shadow(0 0 1.5px rgba(255,255,255,.95)) drop-shadow(0 0 5px rgba(255,255,255,.42))}
+html[data-theme="dark"] .calendar-header h1,html[data-theme="dark"] .palette-header h3,html[data-theme="dark"] .month-date{color:var(--ink)}
 html[data-theme="dark"] .control-panel,html[data-theme="dark"] .grid-header,html[data-theme="dark"] .all-day-row{border-color:rgba(255,255,255,.07);background:rgba(255,255,255,.035)}
 html[data-theme="dark"] .action-btn.active{background:rgba(255,255,255,.1);color:var(--ink)}
 html[data-theme="dark"] .settings-btn,html[data-theme="dark"] .today-btn,html[data-theme="dark"] .theme-btn,html[data-theme="dark"] .btn-modal-cancel,html[data-theme="dark"] .btn-add-preset,html[data-theme="dark"] .nav-arrow,html[data-theme="dark"] .menu-btn,html[data-theme="dark"] .icon-btn{border-color:rgba(255,255,255,.09);background:linear-gradient(145deg,rgba(255,255,255,.09),rgba(255,255,255,.025));color:var(--ink);box-shadow:0 7px 18px rgba(0,0,0,.16),inset 0 1px rgba(255,255,255,.07)}

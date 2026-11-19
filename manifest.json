@@ -1,7 +1,7 @@
 {
   "id": "./",
-  "name": "Schedule — スケジュール帳",
-  "short_name": "Schedule",
+  "name": "TapSchedule",
+  "short_name": "TapSchedule",
   "description": "予定をシンプルに管理する、大学生向けスケジュール帳",
   "lang": "ja",
   "start_url": "./",
@@ -12,6 +12,7 @@
   "background_color": "#e9eafa",
   "theme_color": "#e9eafa",
   "icons": [
-    { "src": "icons/app-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+    { "src": "./apple-touch-icon.jpeg", "sizes": "2048x2048", "type": "image/jpeg", "purpose": "any" },
+    { "src": "./favicon.png", "sizes": "160x160", "type": "image/png", "purpose": "any" }
   ]
 }
