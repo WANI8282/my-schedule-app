@@ -1,4 +1,4 @@
-const CACHE_NAME = 'schedule-shell-v6';
+const CACHE_NAME = 'schedule-shell-v7';
 const APP_SHELL = [
   './',
   './index.html',
@@ -6,10 +6,11 @@ const APP_SHELL = [
   './script.js',
   './manifest.json',
   './logo.svg',
+  './logo.svg?v=3',
   './favicon.png',
-  './favicon.png?v=2',
+  './favicon.png?v=3',
   './apple-touch-icon.jpeg',
-  './apple-touch-icon.jpeg?v=2'
+  './apple-touch-icon.jpeg?v=3'
 ];
 
 self.addEventListener('install', event => {
