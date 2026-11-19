@@ -1,10 +1,11 @@
-const CACHE_NAME = 'schedule-shell-v7';
+const CACHE_NAME = 'schedule-shell-v8';
 const APP_SHELL = [
   './',
   './index.html',
   './style.css',
   './script.js',
   './manifest.json',
+  './manifest.json?v=2',
   './logo.svg',
   './logo.svg?v=3',
   './favicon.png',
